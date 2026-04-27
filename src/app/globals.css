@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background-color: #ffffff;
+    color: #0a0a0a;
+  }
+}
+
+@layer utilities {
+  .canvas-grid-line {
+    @apply border-t border-neutral-200 w-screen relative left-1/2 -translate-x-1/2;
+  }
+}
