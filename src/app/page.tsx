@@ -616,18 +616,16 @@ export default function Home() {
 
       {/* ── HERO ── */}
       <section className="border-x border-neutral-200 max-w-[1280px] mx-auto">
-        <div className="px-6 py-20 md:py-28 grid md:grid-cols-5 gap-12 items-center">
-          <div className="md:col-span-3">
+        <div className="px-6 py-20 md:py-28">
+          <div className="max-w-[680px]">
             <h1 className="text-5xl md:text-6xl font-[550] tracking-tight leading-[1.05] text-neutral-900">
               Маршрут по России.<br />
               <span className="text-neutral-400">3 варианта за 30 секунд.</span>
             </h1>
-          </div>
-          <div className="md:col-span-2 flex flex-col gap-5">
-            <p className="text-base text-neutral-600 max-w-[40ch]">
+            <p className="text-base text-neutral-600 max-w-[48ch] mt-6">
               Задайте бюджет, стиль и количество дней — ИИ соберёт бюджетный, сбалансированный и комфортный вариант с конкретными отелями, билетами и планом по дням.
             </p>
-            <div className="flex gap-3 flex-wrap">
+            <div className="flex gap-3 flex-wrap mt-6">
               <a
                 href="#form"
                 className="inline-flex items-center px-5 py-2 rounded-full bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-700 transition"
@@ -641,6 +639,14 @@ export default function Home() {
                 Как это работает
               </a>
             </div>
+          </div>
+          <div className="mt-12 lg:mt-16 -mx-6 sm:mx-0">
+            <img
+              src="/hero.jpg"
+              alt="Путешествие на поезде через Россию — вид из окна на старинный город"
+              className="w-full max-h-[520px] object-cover rounded-3xl ring-1 ring-neutral-950/10 shadow-xl shadow-neutral-950/5"
+              loading="eager"
+            />
           </div>
         </div>
       </section>
