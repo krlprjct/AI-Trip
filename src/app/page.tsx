@@ -68,44 +68,38 @@ const defaultForm: TravelFormData = {
 const POPULAR_DESTINATIONS = [
   {
     name: "Суздаль",
-    icon: "🏰",
+    image: "/cities/suzdal.jpg",
     hint: "3 дня от 18 000 ₽",
-    gradient: "from-amber-100 to-orange-200",
     form: { budget: 18000, days: 3, distancePreference: "russia" as const, tripStyle: "relaxed" as const, priority: "money" as const },
   },
   {
     name: "Санкт-Петербург",
-    icon: "🌉",
+    image: "/cities/spb.jpg",
     hint: "4 дня от 35 000 ₽",
-    gradient: "from-sky-100 to-blue-200",
     form: { budget: 35000, days: 4, distancePreference: "russia" as const, tripStyle: "relaxed" as const, priority: "time" as const },
   },
   {
     name: "Казань",
-    icon: "🕌",
+    image: "/cities/kazan.jpg",
     hint: "3 дня от 25 000 ₽",
-    gradient: "from-emerald-100 to-teal-200",
     form: { budget: 25000, days: 3, distancePreference: "russia" as const, tripStyle: "relaxed" as const, priority: "destination" as const },
   },
   {
     name: "Сочи",
-    icon: "🌴",
+    image: "/cities/sochi.jpg",
     hint: "5 дней от 45 000 ₽",
-    gradient: "from-yellow-100 to-lime-200",
     form: { budget: 45000, days: 5, distancePreference: "russia" as const, tripStyle: "relaxed" as const, priority: "money" as const },
   },
   {
     name: "Калининград",
-    icon: "🏛️",
+    image: "/cities/kaliningrad.jpg",
     hint: "4 дня от 30 000 ₽",
-    gradient: "from-rose-100 to-pink-200",
     form: { budget: 30000, days: 4, distancePreference: "russia" as const, tripStyle: "relaxed" as const, priority: "money" as const },
   },
   {
     name: "Карелия",
-    icon: "🌲",
+    image: "/cities/kareliya.jpg",
     hint: "4 дня от 28 000 ₽",
-    gradient: "from-green-100 to-emerald-200",
     form: { budget: 28000, days: 4, distancePreference: "russia" as const, tripStyle: "active" as const, priority: "money" as const },
   },
 ];
@@ -722,12 +716,21 @@ export default function Home() {
             {POPULAR_DESTINATIONS.map((dest) => (
               <button
                 key={dest.name}
+                type="button"
                 onClick={() => handleDestinationClick(dest)}
-                className={`bg-gradient-to-br ${dest.gradient} rounded-2xl p-6 cursor-pointer text-left transition-all hover:scale-[1.03] hover:shadow-lg`}
+                className="group relative aspect-[4/3] overflow-hidden rounded-2xl ring-1 ring-neutral-950/10 hover:ring-neutral-950/20 transition-all hover:shadow-xl text-left"
               >
-                <span className="text-6xl mb-2 block">{dest.icon}</span>
-                <p className="font-semibold text-neutral-900">{dest.name}</p>
-                <p className="text-sm text-neutral-700 mt-1">{dest.hint}</p>
+                <img
+                  src={dest.image}
+                  alt={dest.name}
+                  loading="lazy"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-black/0" />
+                <div className="relative h-full flex flex-col justify-end p-5 text-white">
+                  <h3 className="text-xl font-semibold tracking-tight drop-shadow-md">{dest.name}</h3>
+                  <p className="text-sm text-white/85 mt-0.5">{dest.hint}</p>
+                </div>
               </button>
             ))}
           </div>
