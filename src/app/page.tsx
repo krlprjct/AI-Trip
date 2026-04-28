@@ -70,36 +70,42 @@ const POPULAR_DESTINATIONS = [
     name: "Суздаль",
     icon: "🏰",
     hint: "3 дня от 18 000 ₽",
+    gradient: "from-amber-100 to-orange-200",
     form: { budget: 18000, days: 3, distancePreference: "russia" as const, tripStyle: "relaxed" as const, priority: "money" as const },
   },
   {
     name: "Санкт-Петербург",
     icon: "🌉",
     hint: "4 дня от 35 000 ₽",
+    gradient: "from-sky-100 to-blue-200",
     form: { budget: 35000, days: 4, distancePreference: "russia" as const, tripStyle: "relaxed" as const, priority: "time" as const },
   },
   {
     name: "Казань",
     icon: "🕌",
     hint: "3 дня от 25 000 ₽",
+    gradient: "from-emerald-100 to-teal-200",
     form: { budget: 25000, days: 3, distancePreference: "russia" as const, tripStyle: "relaxed" as const, priority: "destination" as const },
   },
   {
     name: "Сочи",
     icon: "🌴",
     hint: "5 дней от 45 000 ₽",
+    gradient: "from-yellow-100 to-lime-200",
     form: { budget: 45000, days: 5, distancePreference: "russia" as const, tripStyle: "relaxed" as const, priority: "money" as const },
   },
   {
     name: "Калининград",
     icon: "🏛️",
     hint: "4 дня от 30 000 ₽",
+    gradient: "from-rose-100 to-pink-200",
     form: { budget: 30000, days: 4, distancePreference: "russia" as const, tripStyle: "relaxed" as const, priority: "money" as const },
   },
   {
     name: "Карелия",
     icon: "🌲",
     hint: "4 дня от 28 000 ₽",
+    gradient: "from-green-100 to-emerald-200",
     form: { budget: 28000, days: 4, distancePreference: "russia" as const, tripStyle: "active" as const, priority: "money" as const },
   },
 ];
@@ -644,7 +650,12 @@ export default function Home() {
 
       {/* ── HERO ── */}
       <section className="border-x border-neutral-200 max-w-[1280px] mx-auto">
-        <div className="px-6 py-20 md:py-28">
+        <div className="relative px-6 py-20 md:py-28">
+          <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+            <div className="absolute top-10 -left-20 w-72 h-72 bg-emerald-300/20 rounded-full blur-3xl" />
+            <div className="absolute top-32 right-0 w-96 h-96 bg-amber-200/30 rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-sky-200/25 rounded-full blur-3xl" />
+          </div>
           <div className="max-w-[680px]">
             <h1 className="text-5xl md:text-6xl font-[550] tracking-tight leading-[1.05] text-neutral-900">
               Маршрут по России.<br />
@@ -712,11 +723,11 @@ export default function Home() {
               <button
                 key={dest.name}
                 onClick={() => handleDestinationClick(dest)}
-                className="bg-white ring-1 ring-neutral-950/10 rounded-2xl p-6 hover:shadow-lg cursor-pointer text-left transition-all hover:ring-neutral-950/20 group"
+                className={`bg-gradient-to-br ${dest.gradient} rounded-2xl p-6 cursor-pointer text-left transition-all hover:scale-[1.03] hover:shadow-lg`}
               >
-                <div className="text-3xl mb-3">{dest.icon}</div>
-                <p className="font-medium text-neutral-900 group-hover:text-neutral-700">{dest.name}</p>
-                <p className="text-sm text-neutral-500 mt-1">{dest.hint}</p>
+                <span className="text-6xl mb-2 block">{dest.icon}</span>
+                <p className="font-semibold text-neutral-900">{dest.name}</p>
+                <p className="text-sm text-neutral-700 mt-1">{dest.hint}</p>
               </button>
             ))}
           </div>
@@ -1101,73 +1112,87 @@ export default function Home() {
             <span className="text-neutral-900">Начните бесплатно.</span>{" "}
             <span className="text-neutral-400">Масштабируйте под задачи.</span>
           </h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              {
-                name: "Сам себе пилот",
-                price: "0 ₽",
-                desc: "3 маршрута в месяц, базовые варианты",
-                features: ["3 генерации/мес", "3 варианта маршрута", "PDF-выгрузка"],
-                featured: false,
-              },
-              {
-                name: "Автопилот Лайт",
-                price: "299 ₽/мес",
-                desc: "20 маршрутов, экспорт и история",
-                features: ["20 генераций/мес", "История маршрутов", "Экспорт в PDF", "Email поддержка"],
-                featured: false,
-              },
-              {
-                name: "Автопилот Полный",
-                price: "5% с брони",
-                desc: "Безлимит + прямое бронирование",
-                features: ["Безлимитные генерации", "Прямое бронирование", "Кешбэк на отели", "Приоритетная поддержка"],
-                featured: true,
-              },
-              {
-                name: "Автопилот Премиум",
-                price: "999 ₽ + 3%",
-                desc: "Корпоративные поездки и группы",
-                features: ["Групповые поездки", "Корпоративный аккаунт", "API доступ", "Персональный менеджер"],
-                featured: false,
-              },
-            ].map((plan) => (
-              <div
-                key={plan.name}
-                className={`rounded-2xl p-6 flex flex-col gap-4 ${
-                  plan.featured
-                    ? "bg-neutral-900 text-white ring-1 ring-neutral-900"
-                    : "bg-neutral-950/[0.025] ring-1 ring-neutral-950/5"
-                }`}
-              >
-                <div>
-                  <p className={`text-xs font-mono uppercase tracking-widest mb-2 ${plan.featured ? "text-neutral-400" : "text-neutral-500"}`}>
-                    {plan.name}
-                  </p>
-                  <p className={`text-2xl font-[550] tracking-tight ${plan.featured ? "text-white" : "text-neutral-900"}`}>
-                    {plan.price}
-                  </p>
-                  <p className={`text-xs mt-1 ${plan.featured ? "text-neutral-400" : "text-neutral-500"}`}>{plan.desc}</p>
-                </div>
-                <ul className="space-y-1.5 flex-1">
-                  {plan.features.map((f) => (
-                    <li key={f} className={`flex gap-2 text-sm ${plan.featured ? "text-neutral-300" : "text-neutral-600"}`}>
-                      <span className={plan.featured ? "text-neutral-400" : "text-emerald-600"}>✓</span>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <button
-                  className={`w-full py-2 rounded-full text-sm font-medium transition ${
-                    plan.featured
-                      ? "bg-white text-neutral-900 hover:bg-neutral-100"
-                      : "bg-neutral-900 text-white hover:bg-neutral-700"
-                  }`}
-                >
-                  Выбрать
-                </button>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
+            {/* Сам себе пилот */}
+            <div className="relative rounded-2xl p-6 flex flex-col h-full gap-4 bg-emerald-50 ring-1 ring-emerald-600/20">
+              <div>
+                <div className="text-3xl mb-3">🎒</div>
+                <h3 className="text-lg font-semibold text-neutral-900">Сам себе пилот</h3>
+                <p className="text-2xl font-[550] tracking-tight text-neutral-900 mt-1">0 ₽</p>
+                <p className="text-xs mt-1 text-neutral-500">3 маршрута в месяц, базовые варианты</p>
               </div>
-            ))}
+              <ul className="space-y-1.5 flex-1">
+                {["3 генерации/мес", "3 варианта маршрута", "PDF-выгрузка"].map((f) => (
+                  <li key={f} className="flex gap-2 text-sm text-neutral-600">
+                    <span className="text-emerald-600">✓</span>{f}
+                  </li>
+                ))}
+              </ul>
+              <button className="mt-auto w-full py-2 rounded-full text-sm font-medium transition bg-white text-emerald-700 ring-1 ring-emerald-600/30 hover:bg-emerald-100">
+                Выбрать
+              </button>
+            </div>
+
+            {/* Автопилот Лайт */}
+            <div className="relative rounded-2xl p-6 flex flex-col h-full gap-4 bg-sky-50 ring-1 ring-sky-600/20">
+              <div>
+                <div className="text-3xl mb-3">✈️</div>
+                <h3 className="text-lg font-semibold text-neutral-900">Автопилот лайт</h3>
+                <p className="text-2xl font-[550] tracking-tight text-neutral-900 mt-1">299 ₽/мес</p>
+                <p className="text-xs mt-1 text-neutral-500">20 маршрутов, экспорт и история</p>
+              </div>
+              <ul className="space-y-1.5 flex-1">
+                {["20 генераций/мес", "История маршрутов", "Экспорт в PDF", "Email поддержка"].map((f) => (
+                  <li key={f} className="flex gap-2 text-sm text-neutral-600">
+                    <span className="text-sky-600">✓</span>{f}
+                  </li>
+                ))}
+              </ul>
+              <button className="mt-auto w-full py-2 rounded-full text-sm font-medium transition bg-white text-sky-700 ring-1 ring-sky-600/30 hover:bg-sky-100">
+                Выбрать
+              </button>
+            </div>
+
+            {/* Автопилот Полный — featured */}
+            <div className="relative rounded-2xl p-6 flex flex-col h-full gap-4 bg-neutral-900 text-white ring-1 ring-neutral-900">
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-amber-400 text-amber-950 text-xs font-bold whitespace-nowrap">Популярный</span>
+              <div>
+                <div className="text-3xl mb-3">🚀</div>
+                <h3 className="text-lg font-semibold text-white">Автопилот полный</h3>
+                <p className="text-2xl font-[550] tracking-tight text-white mt-1">5% с брони</p>
+                <p className="text-xs mt-1 text-neutral-400">Безлимит + прямое бронирование</p>
+              </div>
+              <ul className="space-y-1.5 flex-1">
+                {["Безлимитные генерации", "Прямое бронирование", "Кешбэк на отели", "Приоритетная поддержка"].map((f) => (
+                  <li key={f} className="flex gap-2 text-sm text-neutral-300">
+                    <span className="text-neutral-400">✓</span>{f}
+                  </li>
+                ))}
+              </ul>
+              <button className="mt-auto w-full py-2 rounded-full text-sm font-medium transition bg-white text-neutral-900 hover:bg-neutral-100">
+                Выбрать
+              </button>
+            </div>
+
+            {/* Автопилот Премиум */}
+            <div className="relative rounded-2xl p-6 flex flex-col h-full gap-4 bg-purple-50 ring-1 ring-purple-600/20">
+              <div>
+                <div className="text-3xl mb-3">👑</div>
+                <h3 className="text-lg font-semibold text-neutral-900">Автопилот премиум</h3>
+                <p className="text-2xl font-[550] tracking-tight text-neutral-900 mt-1">999 ₽ + 3%</p>
+                <p className="text-xs mt-1 text-neutral-500">Корпоративные поездки и группы</p>
+              </div>
+              <ul className="space-y-1.5 flex-1">
+                {["Групповые поездки", "Корпоративный аккаунт", "API доступ", "Персональный менеджер"].map((f) => (
+                  <li key={f} className="flex gap-2 text-sm text-neutral-600">
+                    <span className="text-purple-600">✓</span>{f}
+                  </li>
+                ))}
+              </ul>
+              <button className="mt-auto w-full py-2 rounded-full text-sm font-medium transition bg-white text-purple-700 ring-1 ring-purple-600/30 hover:bg-purple-100">
+                Выбрать
+              </button>
+            </div>
           </div>
         </div>
       </section>
