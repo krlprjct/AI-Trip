@@ -78,6 +78,21 @@ async function callOpenAI(prompt: string): Promise<string> {
   return data.choices?.[0]?.message?.content ?? "";
 }
 
+// ─── tryParseAndValidate ──────────────────────────────────────────────────────
+
+function tryParseAndValidate(rawText: string) {
+  const jsonString = extractJSON(rawText);
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(jsonString);
+  } catch {
+    return null;
+  }
+  const validated = RouteResultSchema.safeParse(parsed);
+  if (!validated.success) return null;
+  return validated.data;
+}
+
 // ─── Route handler ────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
@@ -100,15 +115,19 @@ export async function POST(req: NextRequest) {
     const hasOpenAI = !!process.env.OPENAI_API_KEY;
 
     if (!hasGemini && !hasOpenAI) {
-      // Simulate delay for realism
       await new Promise((r) => setTimeout(r, 1500));
       return NextResponse.json(MOCK_ROUTE);
     }
 
-    // 3. Build prompt & call LLM
+    // 3. Build prompt & call LLM (with retry)
     const userPrompt = buildUserPrompt(form);
-    let rawText: string;
+    const RETRY_PREFIX =
+      "КРИТИЧНО: предыдущий ответ был невалидным. Верни ТОЛЬКО валидный JSON, начинающийся с { и заканчивающийся }. Никакого markdown, никаких пояснений.\n\n";
 
+    let rawText: string;
+    let validated = null;
+
+    // First attempt
     if (hasGemini) {
       rawText = await callGemini(userPrompt);
       console.log("RAW:", rawText);
@@ -116,30 +135,33 @@ export async function POST(req: NextRequest) {
       rawText = await callOpenAI(userPrompt);
     }
 
-    if (!rawText) {
-      throw new Error("Модель вернула пустой ответ");
+    if (rawText) {
+      validated = tryParseAndValidate(rawText);
     }
 
-    // 4. Extract & parse JSON
-    const jsonString = extractJSON(rawText);
-    let parsed: unknown;
-
-    try {
-      parsed = JSON.parse(jsonString);
-    } catch {
-      console.error("Raw LLM output:", rawText);
-      throw new Error("Не удалось разобрать JSON от модели. Попробуйте ещё раз.");
+    // Retry if first attempt failed
+    if (!validated) {
+      console.warn("[generate-route] First attempt invalid, retrying with strict prompt...");
+      const retryPrompt = RETRY_PREFIX + userPrompt;
+      let retryRaw: string;
+      if (hasGemini) {
+        retryRaw = await callGemini(retryPrompt);
+      } else {
+        retryRaw = await callOpenAI(retryPrompt);
+      }
+      if (retryRaw) {
+        validated = tryParseAndValidate(retryRaw);
+      }
     }
 
-    // 5. Validate against schema
-    const validated = RouteResultSchema.safeParse(parsed);
-
-    if (!validated.success) {
-      console.error("Schema validation failed:", validated.error.issues);
-      throw new Error("Модель вернула некорректную структуру. Попробуйте ещё раз.");
+    if (!validated) {
+      return NextResponse.json(
+        { error: "Модель вернула некорректный JSON. Попробуйте ещё раз через 5 секунд." },
+        { status: 500 }
+      );
     }
 
-    return NextResponse.json(validated.data);
+    return NextResponse.json(validated);
   } catch (err: unknown) {
     const message =
       err instanceof Error ? err.message : "Неизвестная ошибка сервера";

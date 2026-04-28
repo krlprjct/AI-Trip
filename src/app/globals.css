@@ -17,3 +17,25 @@
     @apply border-t border-neutral-200 w-screen relative left-1/2 -translate-x-1/2;
   }
 }
+
+@media print {
+  nav,
+  section:has(#form),
+  #form,
+  .hero-section,
+  .advantages-section,
+  .how-section,
+  .pricing-section,
+  .cta-section,
+  footer,
+  .canvas-grid-line,
+  [data-print-hide] {
+    display: none !important;
+  }
+  [data-print-show] {
+    display: block !important;
+  }
+  body {
+    background: white;
+  }
+}
