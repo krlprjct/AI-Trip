@@ -354,9 +354,29 @@ function LoaderState() {
   );
 }
 
-// ─── comparison table ─────────────────────────────────────────────────────────
+// ─── tier emoji + bonus labels ────────────────────────────────────────────────
 
-function ComparisonTable({
+const TIER_EMOJI: Record<string, string> = {
+  budget: "🥉",
+  balanced: "🥈",
+  comfort: "🥇",
+};
+
+const TIER_DISPLAY_LABELS: Record<string, string> = {
+  budget: "Эконом",
+  balanced: "Сбалансированный",
+  comfort: "Комфорт",
+};
+
+const TIER_BONUS: Record<string, { emoji: string; label: string }> = {
+  budget: { emoji: "💰", label: "Экономия" },
+  balanced: { emoji: "⚖️", label: "Лучший баланс" },
+  comfort: { emoji: "✨", label: "Премиум" },
+};
+
+// ─── Duolingo-style cards ─────────────────────────────────────────────────────
+
+function DuolingoCards({
   variants,
   activeTier,
   onSelect,
@@ -365,110 +385,118 @@ function ComparisonTable({
   activeTier: string;
   onSelect: (tier: "budget" | "balanced" | "comfort") => void;
 }) {
-  const byTier = (tier: string) => variants.find((v) => v.tier === tier);
   const tiers = ["budget", "balanced", "comfort"] as const;
 
+  const handleSelect = (tier: "budget" | "balanced" | "comfort") => {
+    onSelect(tier);
+    setTimeout(() => {
+      document.getElementById("variant-detail")?.scrollIntoView({ behavior: "smooth" });
+    }, 50);
+  };
+
   return (
-    <div className="overflow-x-auto mb-8">
-      <table className="w-full text-sm border-separate border-spacing-0">
-        <thead>
-          <tr>
-            <th className="text-left py-3 pr-4 text-xs text-neutral-500 font-normal w-28"></th>
-            {tiers.map((tier) => {
-              const isRec = tier === "balanced";
-              return (
-                <th
-                  key={tier}
-                  className={`py-3 px-4 text-center font-medium rounded-t-xl ${
-                    isRec
-                      ? "bg-emerald-50 ring-2 ring-emerald-500/30 text-emerald-800"
-                      : "bg-neutral-100 text-neutral-700"
-                  }`}
-                >
-                  <div className="flex flex-col items-center gap-1">
-                    <span className="text-xs font-mono uppercase tracking-wider">
-                      {TIER_LABELS[tier]}
-                      {isRec && <span className="ml-1">★</span>}
+    <div className="mb-10">
+      <h2 className="text-3xl md:text-4xl tracking-tight font-[550] mb-2">
+        Выбери свой маршрут
+      </h2>
+      <p className="text-neutral-600 mb-8">3 варианта собраны под ваш бюджет и стиль</p>
+
+      <div className="grid md:grid-cols-3 gap-5 items-start">
+        {tiers.map((tier) => {
+          const v = variants.find((vv) => vv.tier === tier);
+          if (!v) return null;
+
+          const isBalanced = tier === "balanced";
+          const isSelected = activeTier === tier;
+          const avgDayCost =
+            v.day_plan.length > 0
+              ? Math.round(
+                  v.day_plan.reduce((acc, d) => acc + d.estimated_day_cost, 0) / v.day_plan.length
+                )
+              : null;
+          const bonus = TIER_BONUS[tier];
+
+          return (
+            <div
+              key={tier}
+              className={`relative bg-white ring-2 rounded-3xl p-6 flex flex-col gap-4 transition-transform ${
+                isBalanced
+                  ? "ring-emerald-500/40 md:scale-[1.02]"
+                  : "ring-neutral-200"
+              }`}
+            >
+              {/* Editor's choice badge */}
+              {isBalanced && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap px-3 py-1 rounded-full bg-amber-400 text-amber-950 text-xs font-bold tracking-wide shadow-md">
+                  ★ ВЫБОР РЕДАКЦИИ
+                </div>
+              )}
+
+              {/* Tier header */}
+              <div className="flex flex-col items-center text-center gap-1 pt-2">
+                <span className="text-4xl">{TIER_EMOJI[tier]}</span>
+                <p className="font-bold text-lg text-neutral-900 leading-tight">
+                  {TIER_DISPLAY_LABELS[tier]}
+                </p>
+              </div>
+
+              {/* Price */}
+              <div className="text-center">
+                <p className="text-4xl font-[700] tracking-tight text-neutral-900">
+                  {v.total_cost.toLocaleString("ru")} ₽
+                </p>
+                <p className="text-xs text-neutral-500 mt-0.5">за всю поездку</p>
+              </div>
+
+              {/* Achievement chips */}
+              <div className="flex flex-col gap-2">
+                {/* Transport chip */}
+                <div className="flex items-center gap-2 bg-neutral-100 rounded-full px-3 py-1.5 text-xs text-neutral-700">
+                  <span>{TRANSPORT_ICONS[v.transport.type] ?? "🚀"}</span>
+                  <span className="font-medium">
+                    {v.transport.price_per_person.toLocaleString("ru")} ₽
+                  </span>
+                  <span className="text-neutral-500 truncate">транспорт</span>
+                </div>
+
+                {/* Stay chip */}
+                <div className="flex items-center gap-2 bg-neutral-100 rounded-full px-3 py-1.5 text-xs text-neutral-700">
+                  <span>🏨</span>
+                  <span className="font-medium truncate max-w-[200px]">{v.stay.name}</span>
+                </div>
+
+                {/* Day cost chip */}
+                {avgDayCost !== null && (
+                  <div className="flex items-center gap-2 bg-neutral-100 rounded-full px-3 py-1.5 text-xs text-neutral-700">
+                    <span>📅</span>
+                    <span className="font-medium">
+                      ~{avgDayCost.toLocaleString("ru")} ₽/день
                     </span>
                   </div>
-                </th>
-              );
-            })}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-neutral-200">
-          {/* Price */}
-          <tr>
-            <td className="py-3 pr-4 text-xs text-neutral-500">Цена</td>
-            {tiers.map((tier) => {
-              const v = byTier(tier);
-              return (
-                <td key={tier} className={`py-3 px-4 text-center font-[550] text-neutral-900 ${tier === "balanced" ? "bg-emerald-50/50" : ""}`}>
-                  {v ? `${v.total_cost.toLocaleString("ru")} ₽` : "—"}
-                </td>
-              );
-            })}
-          </tr>
-          {/* Transport */}
-          <tr>
-            <td className="py-3 pr-4 text-xs text-neutral-500">Транспорт</td>
-            {tiers.map((tier) => {
-              const v = byTier(tier);
-              return (
-                <td key={tier} className={`py-3 px-4 text-center text-neutral-700 ${tier === "balanced" ? "bg-emerald-50/50" : ""}`}>
-                  {v ? `${TRANSPORT_ICONS[v.transport.type] ?? "🚀"} ${v.transport.price_per_person.toLocaleString("ru")} ₽` : "—"}
-                </td>
-              );
-            })}
-          </tr>
-          {/* Stay */}
-          <tr>
-            <td className="py-3 pr-4 text-xs text-neutral-500">Жильё</td>
-            {tiers.map((tier) => {
-              const v = byTier(tier);
-              const stayTypeLabel = v?.stay.type === "hotel" ? "Отель" : v?.stay.type === "hostel" ? "Хостел" : "Апарт.";
-              return (
-                <td key={tier} className={`py-3 px-4 text-center text-neutral-700 text-xs ${tier === "balanced" ? "bg-emerald-50/50" : ""}`}>
-                  {v ? stayTypeLabel : "—"}
-                </td>
-              );
-            })}
-          </tr>
-          {/* Activities */}
-          <tr>
-            <td className="py-3 pr-4 text-xs text-neutral-500">Активности</td>
-            {tiers.map((tier) => (
-              <td key={tier} className={`py-3 px-4 text-center text-xs text-neutral-600 ${tier === "balanced" ? "bg-emerald-50/50" : ""}`}>
-                {TIER_ACTIVITIES[tier]}
-              </td>
-            ))}
-          </tr>
-          {/* Select */}
-          <tr>
-            <td className="py-3 pr-4"></td>
-            {tiers.map((tier) => {
-              const isRec = tier === "balanced";
-              const isActive = activeTier === tier;
-              return (
-                <td key={tier} className={`py-3 px-4 text-center rounded-b-xl ${isRec ? "bg-emerald-50/50" : ""}`}>
-                  <button
-                    onClick={() => onSelect(tier)}
-                    className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all ${
-                      isActive
-                        ? "bg-neutral-900 text-white"
-                        : isRec
-                        ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                        : "bg-white ring-1 ring-neutral-950/10 text-neutral-700 hover:ring-neutral-950/20"
-                    }`}
-                  >
-                    {isRec ? "Выбрать ★" : "Выбрать"}
-                  </button>
-                </td>
-              );
-            })}
-          </tr>
-        </tbody>
-      </table>
+                )}
+
+                {/* Bonus chip */}
+                <div className="flex items-center gap-2 bg-emerald-50 rounded-full px-3 py-1.5 text-xs text-emerald-700 font-medium">
+                  <span>{bonus.emoji}</span>
+                  <span>{bonus.label}</span>
+                </div>
+              </div>
+
+              {/* Select button */}
+              <button
+                onClick={() => handleSelect(tier)}
+                className={`w-full h-14 rounded-2xl font-bold text-base transition-all ${
+                  isSelected
+                    ? "bg-emerald-50 text-emerald-700 ring-2 ring-emerald-500 shadow-none"
+                    : "bg-emerald-500 text-white shadow-[0_4px_0_0_rgb(5,122,85)] hover:translate-y-[2px] hover:shadow-[0_2px_0_0_rgb(5,122,85)] active:translate-y-[4px] active:shadow-none"
+                }`}
+              >
+                {isSelected ? "Выбрано ✓" : "Выбрать"}
+              </button>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -922,9 +950,9 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {/* comparison table + tier tabs */}
+                  {/* Duolingo cards + tier tabs */}
                   <div>
-                    <ComparisonTable
+                    <DuolingoCards
                       variants={result.variants}
                       activeTier={activeTier}
                       onSelect={setActiveTier}
@@ -947,7 +975,7 @@ export default function Home() {
                     </div>
 
                     {/* all 3 cards on desktop, active on mobile */}
-                    <div className="hidden lg:grid lg:grid-cols-3 gap-6">
+                    <div id="variant-detail" className="hidden lg:grid lg:grid-cols-3 gap-6">
                       {result.variants.map((v) => (
                         <VariantCard
                           key={v.tier}
@@ -958,7 +986,7 @@ export default function Home() {
                       ))}
                     </div>
                     {/* mobile: show active variant */}
-                    <div className="lg:hidden">
+                    <div id="variant-detail" className="lg:hidden">
                       {activeVariant && (
                         <VariantCard
                           variant={activeVariant}
