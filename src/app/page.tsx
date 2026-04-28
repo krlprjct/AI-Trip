@@ -642,7 +642,7 @@ export default function Home() {
           </div>
           <div className="mt-12 lg:mt-16 -mx-6 sm:mx-0">
             <img
-              src="/hero.jpg"
+              src="/hero.png"
               alt="Путешествие на поезде через Россию — вид из окна на старинный город"
               className="w-full max-h-[520px] object-cover rounded-3xl ring-1 ring-neutral-950/10 shadow-xl shadow-neutral-950/5"
               loading="eager"
