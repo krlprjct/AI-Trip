@@ -622,15 +622,35 @@ export default function Home() {
       <nav className="border-b border-neutral-200 sticky top-0 z-50 bg-white/95 backdrop-blur">
         <div className="max-w-[1280px] mx-auto px-6 h-14 flex items-center justify-between border-x border-neutral-200">
           <div className="flex items-center gap-8">
-            <a href="#" className="flex items-center gap-2 font-[550] text-neutral-900">
+            <a
+              href="#"
+              onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+              className="flex items-center gap-2 font-[550] text-neutral-900"
+            >
               <span>🗺️</span> AI-Trip
             </a>
             <div className="hidden md:flex items-center gap-6">
-              {["Главная", "Как работает", "Тарифы"].map((l) => (
-                <a key={l} href={`#${l}`} className="text-sm text-neutral-500 hover:text-neutral-900 transition">
-                  {l}
-                </a>
-              ))}
+              <a
+                href="#"
+                onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                className="text-sm text-neutral-500 hover:text-neutral-900 transition"
+              >
+                Главная
+              </a>
+              <a
+                href="#how"
+                onClick={(e) => { e.preventDefault(); document.getElementById("how")?.scrollIntoView({ behavior: "smooth" }); }}
+                className="text-sm text-neutral-500 hover:text-neutral-900 transition"
+              >
+                Как работает
+              </a>
+              <a
+                href="#pricing"
+                onClick={(e) => { e.preventDefault(); document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" }); }}
+                className="text-sm text-neutral-500 hover:text-neutral-900 transition"
+              >
+                Тарифы
+              </a>
               <Link href="/tg" className="text-sm text-neutral-500 hover:text-neutral-900 transition">
                 Бот
               </Link>
@@ -733,6 +753,75 @@ export default function Home() {
                 </div>
               </button>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── RTB SECTION ── */}
+      <div className="canvas-grid-line" />
+      <section className="border-x border-neutral-200 max-w-[1280px] mx-auto">
+        <div className="px-6 py-16">
+          <h2 className="text-3xl md:text-4xl tracking-tight font-[550]">Почему нам можно доверять</h2>
+          <p className="text-neutral-600 mt-2 mb-10">6 фактов, которые делают AI-Trip честным помощником, а не очередным чатом</p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              {
+                emoji: "⏱️",
+                title: "Экономия времени",
+                text: "5 часов на сравнение 10 сайтов превращаются в 30 секунд с ИИ",
+              },
+              {
+                emoji: "🇷🇺",
+                title: "Российские источники",
+                text: "Цены и отели через Островок, Tutu, Aviasales — не ChatGPT, не выдумки модели",
+              },
+              {
+                emoji: "📊",
+                title: "3 варианта = выбор",
+                text: "Не один совет от ИИ, а сравнение эконом / сбалансированный / комфорт",
+              },
+              {
+                emoji: "🛡️",
+                title: "Прозрачная логика",
+                text: "Объясняем почему именно этот отель и этот маршрут. Не чёрный ящик",
+              },
+              {
+                emoji: "🗺️",
+                title: "100+ городов России",
+                text: "От Калининграда до Камчатки — ИИ знает, что показать в каждом регионе",
+              },
+              {
+                emoji: "✋",
+                title: "Управляемый ИИ",
+                text: "Чат правок: «сделай дешевле», «убери музеи». Пересоберёт за секунды",
+              },
+            ].map((card) => (
+              <div
+                key={card.title}
+                className="bg-white ring-1 ring-neutral-950/10 rounded-2xl p-6 hover:shadow-md transition-shadow"
+              >
+                <span className="text-3xl mb-3 block">{card.emoji}</span>
+                <h3 className="font-semibold text-base mb-2">{card.title}</h3>
+                <p className="text-sm text-neutral-600 leading-relaxed">{card.text}</p>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-neutral-500 text-center mt-8">
+            📌 После запуска появятся: реальные отзывы пользователей, статистика сэкономленного бюджета, партнёрские бейджи Tutu, Островка, Aviasales
+          </p>
+        </div>
+      </section>
+
+      {/* ── VALUE PROPOSITION ── */}
+      <div className="canvas-grid-line" />
+      <section className="border-x border-neutral-200 max-w-[1280px] mx-auto">
+        <div className="px-6 py-8 flex justify-center">
+          <div className="max-w-[640px] w-full px-6 py-6 bg-amber-50 ring-1 ring-amber-200 rounded-2xl text-center">
+            <p className="text-sm text-amber-900 leading-relaxed">
+              💡 Турагентство возьмёт 5–15% и сделает маршрут за 3 дня.<br/>
+              Мы соберём за 30 секунд бесплатно. Платите только если бронируете через нас —
+              цены такие же, как на Tutu и Островке напрямую.
+            </p>
           </div>
         </div>
       </section>
@@ -1109,7 +1198,7 @@ export default function Home() {
 
       {/* ── PRICING ── */}
       <div className="canvas-grid-line" />
-      <section id="Тарифы" className="border-x border-neutral-200 max-w-[1280px] mx-auto">
+      <section id="pricing" className="border-x border-neutral-200 max-w-[1280px] mx-auto">
         <div className="px-6 py-16">
           <h2 className="text-3xl md:text-4xl font-[550] tracking-tight mb-12">
             <span className="text-neutral-900">Начните бесплатно.</span>{" "}
@@ -1141,11 +1230,11 @@ export default function Home() {
               <div>
                 <div className="text-3xl mb-3">✈️</div>
                 <h3 className="text-lg font-semibold text-neutral-900">Автопилот лайт</h3>
-                <p className="text-2xl font-[550] tracking-tight text-neutral-900 mt-1">299 ₽/мес</p>
-                <p className="text-xs mt-1 text-neutral-500">20 маршрутов, экспорт и история</p>
+                <p className="text-2xl font-[550] tracking-tight text-neutral-900 mt-1">299 ₽ за поездку</p>
+                <p className="text-xs mt-1 text-neutral-500">Разовая оплата за маршрут с бронированием</p>
               </div>
               <ul className="space-y-1.5 flex-1">
-                {["20 генераций/мес", "История маршрутов", "Экспорт в PDF", "Email поддержка"].map((f) => (
+                {["ИИ ищет билеты и отели", "Оплата одной суммой", "История маршрутов", "Экспорт в PDF"].map((f) => (
                   <li key={f} className="flex gap-2 text-sm text-neutral-600">
                     <span className="text-sky-600">✓</span>{f}
                   </li>
@@ -1172,6 +1261,9 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
+              <p className="text-xs text-white/70 mt-3 leading-relaxed">
+                5% — это партнёрская комиссия от Tutu, Островка, Aviasales. Вы платите столько же, сколько на их сайтах напрямую. Мы получаем процент за привод клиента.
+              </p>
               <button className="mt-auto w-full py-2 rounded-full text-sm font-medium transition bg-white text-neutral-900 hover:bg-neutral-100">
                 Выбрать
               </button>
