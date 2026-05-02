@@ -19,23 +19,25 @@
 }
 
 @media print {
-  nav,
-  section:has(#form),
-  #form,
-  .hero-section,
-  .advantages-section,
-  .how-section,
-  .pricing-section,
-  .cta-section,
-  footer,
-  .canvas-grid-line,
-  [data-print-hide] {
-    display: none !important;
+  /* по умолчанию скрыть всё */
+  body * { visibility: hidden; }
+  /* показать только результат и его потомков */
+  #print-area, #print-area * { visibility: visible; }
+  /* убрать все отступы для чистой печати */
+  #print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
   }
-  [data-print-show] {
-    display: block !important;
-  }
-  body {
-    background: white;
-  }
+  /* убрать sticky-навбар, hero и прочее */
+  header, nav, footer { display: none !important; }
+  /* предотвратить разрыв страниц внутри карточек */
+  .print-keep-together { page-break-inside: avoid; }
+  /* белый фон, чёрный текст */
+  html, body { background: white !important; color: black !important; }
+  /* убрать ring/shadow на печати */
+  * { box-shadow: none !important; }
+  /* убрать iframe карты — на PDF не нужна */
+  iframe { display: none !important; }
 }

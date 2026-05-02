@@ -1025,7 +1025,7 @@ export default function Home() {
               {loading && <LoaderState />}
 
               {result && (
-                <div className="space-y-12">
+                <div id="print-area" className="print-keep-together space-y-12">
                   {/* destination + summary + share/pdf buttons */}
                   <div className="flex items-start justify-between gap-4 flex-wrap">
                     <div>
@@ -1212,6 +1212,7 @@ export default function Home() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
             {/* Сам себе пилот */}
             <div className="relative rounded-2xl p-6 flex flex-col h-full gap-4 bg-emerald-50 ring-1 ring-emerald-600/20">
+              <span className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-100 text-emerald-700 ring-1 ring-emerald-600/30">✅ Сейчас работает</span>
               <div>
                 <div className="text-3xl mb-3">🎒</div>
                 <h3 className="text-lg font-semibold text-neutral-900">Сам себе пилот</h3>
@@ -1232,6 +1233,7 @@ export default function Home() {
 
             {/* Автопилот Лайт */}
             <div className="relative rounded-2xl p-6 flex flex-col h-full gap-4 bg-sky-50 ring-1 ring-sky-600/20">
+              <span className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-100 text-amber-700 ring-1 ring-amber-600/30">🚧 Скоро</span>
               <div>
                 <div className="text-3xl mb-3">✈️</div>
                 <h3 className="text-lg font-semibold text-neutral-900">Автопилот лайт</h3>
@@ -1253,6 +1255,7 @@ export default function Home() {
             {/* Автопилот Полный — featured */}
             <div className="relative rounded-2xl p-6 flex flex-col h-full gap-4 bg-neutral-900 text-white ring-1 ring-neutral-900">
               <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-amber-400 text-amber-950 text-xs font-bold whitespace-nowrap">Популярный</span>
+              <span className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-100 text-amber-700 ring-1 ring-amber-600/30">🚧 Скоро</span>
               <div>
                 <div className="text-3xl mb-3">🚀</div>
                 <h3 className="text-lg font-semibold text-white">Автопилот полный</h3>
@@ -1293,6 +1296,55 @@ export default function Home() {
                 Выбрать
               </button>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ — Как работает бронирование ── */}
+      <div className="canvas-grid-line" />
+      <section className="border-x border-neutral-200 max-w-[1280px] mx-auto">
+        <div className="max-w-[820px] mx-auto px-6 py-16">
+          <h2 className="text-3xl md:text-4xl tracking-tight font-[550] mb-2">
+            Как работает <span className="text-neutral-500">бронирование?</span>
+          </h2>
+          <p className="text-neutral-600 mb-10">Прозрачно. Без скрытых платежей.</p>
+          <div className="space-y-4">
+            <details className="group rounded-2xl bg-white ring-1 ring-neutral-950/10 p-5 open:ring-neutral-950/20">
+              <summary className="font-medium cursor-pointer flex items-center justify-between list-none">
+                Сейчас (MVP) — куда я попадаю при клике «Купить»?
+                <span className="text-neutral-400 group-open:rotate-180 transition-transform">⌄</span>
+              </summary>
+              <p className="mt-3 text-sm text-neutral-600 leading-relaxed">
+                Кнопка «Купить» открывает партнёрский сайт (Tutu для билетов, Островок для отелей, Aviasales для авиа) с уже заполненными вашими параметрами. Вы платите им напрямую, по их ценам. Мы получаем партнёрскую комиссию — для вас цена не меняется.
+              </p>
+            </details>
+            <details className="group rounded-2xl bg-white ring-1 ring-neutral-950/10 p-5 open:ring-neutral-950/20">
+              <summary className="font-medium cursor-pointer flex items-center justify-between list-none">
+                В будущем (V2) — что меняется при выборе платного тарифа?
+                <span className="text-neutral-400 group-open:rotate-180 transition-transform">⌄</span>
+              </summary>
+              <p className="mt-3 text-sm text-neutral-600 leading-relaxed">
+                Платные тарифы (Автопилот Лайт / Полный / Премиум) появятся когда мы запустим прямое бронирование на сайте — без редиректа. Вы выбираете маршрут и оплачиваете одной кнопкой через ЮKassu. Цены те же, что на партнёрских сайтах. Сейчас платные тарифы помечены «🚧 Скоро».
+              </p>
+            </details>
+            <details className="group rounded-2xl bg-white ring-1 ring-neutral-950/10 p-5 open:ring-neutral-950/20">
+              <summary className="font-medium cursor-pointer flex items-center justify-between list-none">
+                Сколько стоит сгенерировать маршрут прямо сейчас?
+                <span className="text-neutral-400 group-open:rotate-180 transition-transform">⌄</span>
+              </summary>
+              <p className="mt-3 text-sm text-neutral-600 leading-relaxed">
+                Бесплатно. Без ограничений. Никаких карт привязывать не нужно. Платите только если решите забронировать через партнёрский сервис — и платите им, не нам.
+              </p>
+            </details>
+            <details className="group rounded-2xl bg-white ring-1 ring-neutral-950/10 p-5 open:ring-neutral-950/20">
+              <summary className="font-medium cursor-pointer flex items-center justify-between list-none">
+                А если ИИ ошибётся — кто отвечает?
+                <span className="text-neutral-400 group-open:rotate-180 transition-transform">⌄</span>
+              </summary>
+              <p className="mt-3 text-sm text-neutral-600 leading-relaxed">
+                ИИ работает с актуальными ценами и расписаниями партнёров. Если на партнёрском сайте окажется другая цена или нет нужного отеля — это решается у партнёра напрямую. На платных тарифах в будущем мы добавим страховку поездки и ручную проверку отелей сотрудниками сервиса.
+              </p>
+            </details>
           </div>
         </div>
       </section>
