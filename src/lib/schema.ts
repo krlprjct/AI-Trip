@@ -4,7 +4,7 @@ export const TravelFormSchema = z.object({
   budget: z.number().min(1000, "Минимальный бюджет 1000 ₽"),
   days: z.number().min(1).max(30),
   startCity: z.string().min(2, "Укажите город отправления"),
-  distancePreference: z.enum(["local", "russia", "abroad"]),
+  distancePreference: z.enum(["local", "district", "russia"]),
   tripStyle: z.enum(["active", "relaxed", "family", "romantic"]),
   peopleCount: z.number().min(1),
   constraints: z.string().default(""),

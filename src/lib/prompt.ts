@@ -2,8 +2,8 @@ import { TravelFormData } from "./schema";
 
 const DISTANCE_MAP: Record<string, string> = {
   local: "в своём регионе (до 300 км)",
+  district: "в пределах своего федерального округа (например, в ЦФО — Москва, Тула, Калуга, Суздаль; в УрФО — Тюмень, Екатеринбург, Челябинск)",
   russia: "по России (любой регион)",
-  abroad: "за рубежом",
 };
 
 const STYLE_MAP: Record<string, string> = {

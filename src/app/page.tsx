@@ -9,8 +9,8 @@ import { transportLink, stayLink } from "@/lib/deep-links";
 
 const DISTANCE_OPTIONS = [
   { value: "local", label: "В своём регионе" },
-  { value: "russia", label: "По России" },
-  { value: "abroad", label: "За рубежом" },
+  { value: "district", label: "По федеральному округу" },
+  { value: "russia", label: "По всей России" },
 ];
 
 const STYLE_OPTIONS = [
@@ -656,9 +656,6 @@ export default function Home() {
               </Link>
             </div>
           </div>
-          <button className="hidden md:inline-flex items-center px-4 py-1.5 rounded-full text-sm bg-white ring-1 ring-neutral-950/10 shadow-sm text-neutral-700 hover:ring-neutral-950/20 transition">
-            Войти
-          </button>
         </div>
       </nav>
 
@@ -1200,10 +1197,18 @@ export default function Home() {
       <div className="canvas-grid-line" />
       <section id="pricing" className="border-x border-neutral-200 max-w-[1280px] mx-auto">
         <div className="px-6 py-16">
-          <h2 className="text-3xl md:text-4xl font-[550] tracking-tight mb-12">
+          <h2 className="text-3xl md:text-4xl font-[550] tracking-tight mb-8">
             <span className="text-neutral-900">Начните бесплатно.</span>{" "}
             <span className="text-neutral-400">Масштабируйте под задачи.</span>
           </h2>
+
+          <div className="max-w-[720px] mx-auto mb-12 px-6 py-5 bg-emerald-50 ring-1 ring-emerald-200 rounded-2xl text-center">
+            <p className="text-sm text-emerald-900 leading-relaxed">
+              💡 <strong>3 варианта маршрута — всегда бесплатно.</strong> Тарифы нужны, только если вы захотите забронировать через нас одной кнопкой.<br/>
+              На прямых сайтах (Tutu, Островок, Aviasales) цены такие же — мы получаем партнёрскую комиссию.
+            </p>
+          </div>
+
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
             {/* Сам себе пилот */}
             <div className="relative rounded-2xl p-6 flex flex-col h-full gap-4 bg-emerald-50 ring-1 ring-emerald-600/20">
@@ -1211,10 +1216,10 @@ export default function Home() {
                 <div className="text-3xl mb-3">🎒</div>
                 <h3 className="text-lg font-semibold text-neutral-900">Сам себе пилот</h3>
                 <p className="text-2xl font-[550] tracking-tight text-neutral-900 mt-1">0 ₽</p>
-                <p className="text-xs mt-1 text-neutral-500">3 маршрута в месяц, базовые варианты</p>
+                <p className="text-xs mt-1 text-neutral-500">Студенты и тестирование</p>
               </div>
               <ul className="space-y-1.5 flex-1">
-                {["3 генерации/мес", "3 варианта маршрута", "PDF-выгрузка"].map((f) => (
+                {["Безлимит ИИ-маршрутов", "3 варианта на каждый запрос", "Ссылки на Tutu, Островок, Aviasales", "Экспорт в PDF"].map((f) => (
                   <li key={f} className="flex gap-2 text-sm text-neutral-600">
                     <span className="text-emerald-600">✓</span>{f}
                   </li>
@@ -1230,11 +1235,11 @@ export default function Home() {
               <div>
                 <div className="text-3xl mb-3">✈️</div>
                 <h3 className="text-lg font-semibold text-neutral-900">Автопилот лайт</h3>
-                <p className="text-2xl font-[550] tracking-tight text-neutral-900 mt-1">299 ₽ за поездку</p>
-                <p className="text-xs mt-1 text-neutral-500">Разовая оплата за маршрут с бронированием</p>
+                <p className="text-2xl font-[550] tracking-tight text-neutral-900 mt-1">299 ₽ / поездка</p>
+                <p className="text-xs mt-1 text-neutral-500">Экономные путешественники</p>
               </div>
               <ul className="space-y-1.5 flex-1">
-                {["ИИ ищет билеты и отели", "Оплата одной суммой", "История маршрутов", "Экспорт в PDF"].map((f) => (
+                {["Всё из бесплатного", "Бронирование в один клик", "История маршрутов", "Email-поддержка"].map((f) => (
                   <li key={f} className="flex gap-2 text-sm text-neutral-600">
                     <span className="text-sky-600">✓</span>{f}
                   </li>
@@ -1252,10 +1257,10 @@ export default function Home() {
                 <div className="text-3xl mb-3">🚀</div>
                 <h3 className="text-lg font-semibold text-white">Автопилот полный</h3>
                 <p className="text-2xl font-[550] tracking-tight text-white mt-1">5% с брони</p>
-                <p className="text-xs mt-1 text-neutral-400">Безлимит + прямое бронирование</p>
+                <p className="text-xs mt-1 text-neutral-400">Семейные и занятые</p>
               </div>
               <ul className="space-y-1.5 flex-1">
-                {["Безлимитные генерации", "Прямое бронирование", "Кешбэк на отели", "Приоритетная поддержка"].map((f) => (
+                {["Прямое бронирование без сервисного сбора", "Поддержка 24/7 в поездке", "Кешбэк баллами на отели", "Сопровождение в поездке"].map((f) => (
                   <li key={f} className="flex gap-2 text-sm text-neutral-300">
                     <span className="text-neutral-400">✓</span>{f}
                   </li>
@@ -1275,10 +1280,10 @@ export default function Home() {
                 <div className="text-3xl mb-3">👑</div>
                 <h3 className="text-lg font-semibold text-neutral-900">Автопилот премиум</h3>
                 <p className="text-2xl font-[550] tracking-tight text-neutral-900 mt-1">999 ₽ + 3%</p>
-                <p className="text-xs mt-1 text-neutral-500">Корпоративные поездки и группы</p>
+                <p className="text-xs mt-1 text-neutral-500">VIP и групповые поездки</p>
               </div>
               <ul className="space-y-1.5 flex-1">
-                {["Групповые поездки", "Корпоративный аккаунт", "API доступ", "Персональный менеджер"].map((f) => (
+                {["Персональный менеджер", "Ручная проверка отелей", "Раннее заселение", "Гибкие изменения маршрута"].map((f) => (
                   <li key={f} className="flex gap-2 text-sm text-neutral-600">
                     <span className="text-purple-600">✓</span>{f}
                   </li>
