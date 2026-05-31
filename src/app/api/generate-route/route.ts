@@ -20,9 +20,9 @@ function extractJSON(text: string): string {
 
 // ─── Gemini ──────────────────────────────────────────────────────────────────
 
-async function callGemini(prompt: string): Promise<string> {
+async function callGemini(prompt: string, useFlash = false): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY!;
-  const model = "gemini-2.5-flash";
+  const model = useFlash ? "gemini-2.5-flash" : "gemini-2.5-flash-lite";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   const body = {
@@ -144,13 +144,13 @@ export async function POST(req: NextRequest) {
       validated = tryParseAndValidate(rawText);
     }
 
-    // Retry if first attempt failed
+    // Retry if first attempt failed — upgrade to gemini-2.5-flash (мощнее Lite)
     if (!validated) {
-      console.warn("[generate-route] First attempt invalid, retrying with strict prompt...");
+      console.warn("[generate-route] Lite failed, retrying with gemini-2.5-flash...");
       const retryPrompt = RETRY_PREFIX + userPrompt;
       let retryRaw: string;
       if (hasGemini) {
-        retryRaw = await callGemini(retryPrompt);
+        retryRaw = await callGemini(retryPrompt, true); // useFlash=true
       } else {
         retryRaw = await callOpenAI(retryPrompt);
       }

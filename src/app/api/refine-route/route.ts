@@ -18,9 +18,9 @@ function extractJSON(text: string): string {
   return text.trim();
 }
 
-async function callGemini(prompt: string): Promise<string> {
+async function callGemini(prompt: string, useFlash = false): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY!;
-  const model = "gemini-2.5-flash";
+  const model = useFlash ? "gemini-2.5-flash" : "gemini-2.5-flash-lite";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   const body = {
@@ -101,10 +101,10 @@ ${JSON.stringify(variant, null, 2)}
     let raw = await callGemini(buildPrompt());
     let result = raw ? tryParseAndValidate(raw) : null;
 
-    // Retry
+    // Retry — upgrade to gemini-2.5-flash
     if (!result) {
-      console.warn("[refine-route] First attempt invalid, retrying...");
-      raw = await callGemini(buildPrompt(RETRY_PREFIX));
+      console.warn("[refine-route] Lite failed, retrying with gemini-2.5-flash...");
+      raw = await callGemini(buildPrompt(RETRY_PREFIX), true);
       result = raw ? tryParseAndValidate(raw) : null;
     }
 
