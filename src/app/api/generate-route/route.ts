@@ -31,7 +31,6 @@ async function callGemini(prompt: string): Promise<string> {
     generationConfig: {
       temperature: 0.7,
       maxOutputTokens: 32768,
-      responseMimeType: "application/json",
     },
   };
 
@@ -134,7 +133,9 @@ export async function POST(req: NextRequest) {
     // First attempt
     if (hasGemini) {
       rawText = await callGemini(userPrompt);
-      console.log("RAW:", rawText);
+      console.log("[generate-route] RAW length:", rawText?.length ?? 0);
+      console.log("[generate-route] RAW first 500:", rawText?.slice(0, 500));
+      console.log("[generate-route] RAW last 200:", rawText?.slice(-200));
     } else {
       rawText = await callOpenAI(userPrompt);
     }
