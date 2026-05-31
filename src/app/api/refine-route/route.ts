@@ -26,7 +26,11 @@ async function callGemini(prompt: string): Promise<string> {
   const body = {
     system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
     contents: [{ role: "user", parts: [{ text: prompt }] }],
-    generationConfig: { temperature: 0.7, maxOutputTokens: 4096 },
+    generationConfig: {
+      temperature: 0.7,
+      maxOutputTokens: 16384,
+      responseMimeType: "application/json",
+    },
   };
 
   const res = await fetch(url, {

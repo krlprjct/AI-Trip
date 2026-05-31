@@ -55,7 +55,7 @@ const LOADER_MESSAGES = [
 const defaultForm: TravelFormData = {
   budget: 30000,
   days: 5,
-  startCity: "Москва",
+  startCity: "Тюмень",
   distancePreference: "russia",
   tripStyle: "relaxed",
   peopleCount: 2,
@@ -906,7 +906,7 @@ export default function Home() {
                   value={form.startCity}
                   onChange={handleChange}
                   required
-                  placeholder="Москва"
+                  placeholder="Тюмень"
                   className="w-full bg-white ring-1 ring-neutral-950/10 rounded-xl px-3 py-2.5 text-neutral-900 focus:outline-none focus:ring-neutral-950/30 transition text-sm"
                 />
               </div>
