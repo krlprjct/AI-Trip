@@ -19,7 +19,9 @@ function extractJSON(text: string): string {
 }
 
 async function callGemini(prompt: string, useFlash = false): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY!;
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return "";
+
   const model = useFlash ? "gemini-2.5-flash" : "gemini-2.5-flash-lite";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
@@ -32,20 +34,30 @@ async function callGemini(prompt: string, useFlash = false): Promise<string> {
     },
   };
 
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-    signal: AbortSignal.timeout(55000),
-  });
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(25000),
+    });
 
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Gemini error ${res.status}: ${err}`);
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error(`[refine Gemini ${model}] ${res.status}:`, errText.slice(0, 200));
+      if (res.status === 429 || res.status >= 500) return "";
+      throw new Error(`Gemini ${res.status}: ${errText.slice(0, 200)}`);
+    }
+
+    const data = await res.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+  } catch (err) {
+    if (err instanceof Error && (err.name === "TimeoutError" || err.name === "AbortError")) {
+      console.error(`[refine Gemini ${model}] timeout`);
+      return "";
+    }
+    throw err;
   }
-
-  const data = await res.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 }
 
 function tryParseAndValidate(rawText: string) {

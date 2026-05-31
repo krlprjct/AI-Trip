@@ -21,7 +21,9 @@ function extractJSON(text: string): string {
 // ─── Gemini ──────────────────────────────────────────────────────────────────
 
 async function callGemini(prompt: string, useFlash = false): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY!;
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return "";
+
   const model = useFlash ? "gemini-2.5-flash" : "gemini-2.5-flash-lite";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
@@ -34,20 +36,33 @@ async function callGemini(prompt: string, useFlash = false): Promise<string> {
     },
   };
 
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-    signal: AbortSignal.timeout(55000),
-  });
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(25000),
+    });
 
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Gemini error ${res.status}: ${err}`);
+    if (!res.ok) {
+      // 429 (rate limit) / 5xx — возвращаем пустую строку чтобы сработал retry на Flash
+      // 400 (bad request) — фатальная ошибка, бросаем
+      const errText = await res.text();
+      console.error(`[Gemini ${model}] ${res.status}:`, errText.slice(0, 200));
+      if (res.status === 429 || res.status >= 500) return "";
+      throw new Error(`Gemini ${res.status}: ${errText.slice(0, 200)}`);
+    }
+
+    const data = await res.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+  } catch (err) {
+    // Сетевые/timeout ошибки — даём retry шанс
+    if (err instanceof Error && (err.name === "TimeoutError" || err.name === "AbortError")) {
+      console.error(`[Gemini ${model}] timeout`);
+      return "";
+    }
+    throw err;
   }
-
-  const data = await res.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 }
 
 // ─── OpenAI ──────────────────────────────────────────────────────────────────
@@ -69,12 +84,13 @@ async function callOpenAI(prompt: string): Promise<string> {
       max_tokens: 4096,
       response_format: { type: "json_object" },
     }),
-    signal: AbortSignal.timeout(55000),
+    signal: AbortSignal.timeout(25000),
   });
 
   if (!res.ok) {
     const err = await res.text();
-    throw new Error(`OpenAI error ${res.status}: ${err}`);
+    if (res.status === 429 || res.status >= 500) return "";
+    throw new Error(`OpenAI error ${res.status}: ${err.slice(0, 200)}`);
   }
 
   const data = await res.json();
@@ -133,9 +149,6 @@ export async function POST(req: NextRequest) {
     // First attempt
     if (hasGemini) {
       rawText = await callGemini(userPrompt);
-      console.log("[generate-route] RAW length:", rawText?.length ?? 0);
-      console.log("[generate-route] RAW first 500:", rawText?.slice(0, 500));
-      console.log("[generate-route] RAW last 200:", rawText?.slice(-200));
     } else {
       rawText = await callOpenAI(userPrompt);
     }
