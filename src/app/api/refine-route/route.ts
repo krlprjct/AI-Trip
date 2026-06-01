@@ -20,20 +20,23 @@ function extractJSON(text: string): string {
   return text.trim();
 }
 
-async function callGemini(prompt: string, useFlash = false): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) return "";
+function getGeminiKeys(): string[] {
+  const multi = process.env.GEMINI_API_KEYS;
+  if (multi) return multi.split(",").map((k) => k.trim()).filter(Boolean);
+  const single = process.env.GEMINI_API_KEY;
+  return single ? [single] : [];
+}
 
-  const model = useFlash ? "gemini-2.5-flash" : "gemini-2.5-flash-lite";
+async function geminiRequest(
+  apiKey: string,
+  model: string,
+  prompt: string
+): Promise<{ text: string; rateLimited: boolean }> {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
   const body = {
     system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
     contents: [{ role: "user", parts: [{ text: prompt }] }],
-    generationConfig: {
-      temperature: 0.7,
-      maxOutputTokens: 16384,
-    },
+    generationConfig: { temperature: 0.7, maxOutputTokens: 16384 },
   };
 
   try {
@@ -46,20 +49,33 @@ async function callGemini(prompt: string, useFlash = false): Promise<string> {
 
     if (!res.ok) {
       const errText = await res.text();
-      console.error(`[refine Gemini ${model}] ${res.status}:`, errText.slice(0, 200));
-      if (res.status === 429 || res.status >= 500) return "";
-      throw new Error(`Gemini ${res.status}: ${errText.slice(0, 200)}`);
+      console.error(`[refine Gemini ${model}] ${res.status}:`, errText.slice(0, 150));
+      if (res.status === 429) return { text: "", rateLimited: true };
+      if (res.status >= 500) return { text: "", rateLimited: false };
+      throw new Error(`Gemini ${res.status}: ${errText.slice(0, 150)}`);
     }
 
     const data = await res.json();
-    return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+    return { text: data.candidates?.[0]?.content?.parts?.[0]?.text ?? "", rateLimited: false };
   } catch (err) {
     if (err instanceof Error && (err.name === "TimeoutError" || err.name === "AbortError")) {
       console.error(`[refine Gemini ${model}] timeout`);
-      return "";
+      return { text: "", rateLimited: false };
     }
     throw err;
   }
+}
+
+async function callGemini(prompt: string, useFlash = false): Promise<string> {
+  const keys = getGeminiKeys();
+  if (keys.length === 0) return "";
+  const model = useFlash ? "gemini-2.5-flash" : "gemini-2.5-flash-lite";
+  for (const key of keys) {
+    const { text, rateLimited } = await geminiRequest(key, model, prompt);
+    if (text) return text;
+    if (!rateLimited) return "";
+  }
+  return "";
 }
 
 async function callDeepSeek(systemPrompt: string, userPrompt: string): Promise<string> {
@@ -129,7 +145,7 @@ export async function POST(req: NextRequest) {
     const { variant, instruction, form } = parsed.data;
 
     const hasDeepSeek = !!process.env.DEEPSEEK_API_KEY;
-    const hasGemini = !!process.env.GEMINI_API_KEY;
+    const hasGemini = getGeminiKeys().length > 0;
 
     if (!hasDeepSeek && !hasGemini) {
       // Mock: return same variant

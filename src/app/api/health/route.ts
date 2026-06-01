@@ -7,9 +7,15 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const test = url.searchParams.get("test");
 
+  const geminiKeyCount = process.env.GEMINI_API_KEYS
+    ? process.env.GEMINI_API_KEYS.split(",").map((k) => k.trim()).filter(Boolean).length
+    : process.env.GEMINI_API_KEY
+    ? 1
+    : 0;
+
   const base = {
-    version: "fix-429-retry-v2",
-    hasGeminiKey: !!process.env.GEMINI_API_KEY,
+    version: "gemini-key-rotation-v3",
+    geminiKeyCount,
     hasDeepSeekKey: !!process.env.DEEPSEEK_API_KEY,
     deployedAt: "2026-06-01",
   };

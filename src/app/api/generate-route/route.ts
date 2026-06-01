@@ -24,20 +24,28 @@ function extractJSON(text: string): string {
 
 // ─── Gemini ──────────────────────────────────────────────────────────────────
 
-async function callGemini(prompt: string, useFlash = false): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) return "";
+// Пул ключей: GEMINI_API_KEYS="key1,key2,key3" (приоритет) или один GEMINI_API_KEY.
+// Каждый ключ = отдельный Google-проект = независимая квота 20 RPD на free tier.
+function getGeminiKeys(): string[] {
+  const multi = process.env.GEMINI_API_KEYS;
+  if (multi) {
+    return multi.split(",").map((k) => k.trim()).filter(Boolean);
+  }
+  const single = process.env.GEMINI_API_KEY;
+  return single ? [single] : [];
+}
 
-  const model = useFlash ? "gemini-2.5-flash" : "gemini-2.5-flash-lite";
+// Один вызов к Gemini конкретным ключом. Возвращает {text, rateLimited}.
+async function geminiRequest(
+  apiKey: string,
+  model: string,
+  prompt: string
+): Promise<{ text: string; rateLimited: boolean }> {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
   const body = {
     system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
     contents: [{ role: "user", parts: [{ text: prompt }] }],
-    generationConfig: {
-      temperature: 0.7,
-      maxOutputTokens: 32768,
-    },
+    generationConfig: { temperature: 0.7, maxOutputTokens: 32768 },
   };
 
   try {
@@ -49,24 +57,39 @@ async function callGemini(prompt: string, useFlash = false): Promise<string> {
     });
 
     if (!res.ok) {
-      // 429 (rate limit) / 5xx — возвращаем пустую строку чтобы сработал retry на Flash
-      // 400 (bad request) — фатальная ошибка, бросаем
       const errText = await res.text();
-      console.error(`[Gemini ${model}] ${res.status}:`, errText.slice(0, 200));
-      if (res.status === 429 || res.status >= 500) return "";
-      throw new Error(`Gemini ${res.status}: ${errText.slice(0, 200)}`);
+      console.error(`[Gemini ${model}] ${res.status}:`, errText.slice(0, 150));
+      // 429 — этот ключ исчерпан, сигналим ротацию на следующий
+      if (res.status === 429) return { text: "", rateLimited: true };
+      if (res.status >= 500) return { text: "", rateLimited: false };
+      throw new Error(`Gemini ${res.status}: ${errText.slice(0, 150)}`);
     }
 
     const data = await res.json();
-    return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+    return { text: data.candidates?.[0]?.content?.parts?.[0]?.text ?? "", rateLimited: false };
   } catch (err) {
-    // Сетевые/timeout ошибки — даём retry шанс
     if (err instanceof Error && (err.name === "TimeoutError" || err.name === "AbortError")) {
       console.error(`[Gemini ${model}] timeout`);
-      return "";
+      return { text: "", rateLimited: false };
     }
     throw err;
   }
+}
+
+async function callGemini(prompt: string, useFlash = false): Promise<string> {
+  const keys = getGeminiKeys();
+  if (keys.length === 0) return "";
+
+  const model = useFlash ? "gemini-2.5-flash" : "gemini-2.5-flash-lite";
+
+  // Перебираем ключи: при 429 на одном — пробуем следующий (у каждого своя квота).
+  for (const key of keys) {
+    const { text, rateLimited } = await geminiRequest(key, model, prompt);
+    if (text) return text;
+    if (!rateLimited) return ""; // не rate-limit (5xx/timeout) — ротация не поможет
+    // rateLimited → пробуем следующий ключ
+  }
+  return ""; // все ключи исчерпаны
 }
 
 // ─── OpenAI ──────────────────────────────────────────────────────────────────
@@ -179,7 +202,7 @@ export async function POST(req: NextRequest) {
 
     // 2. Mock mode — если нет ни одного ключа
     const hasDeepSeek = !!process.env.DEEPSEEK_API_KEY;
-    const hasGemini = !!process.env.GEMINI_API_KEY;
+    const hasGemini = getGeminiKeys().length > 0;
     const hasOpenAI = !!process.env.OPENAI_API_KEY;
 
     if (!hasDeepSeek && !hasGemini && !hasOpenAI) {
