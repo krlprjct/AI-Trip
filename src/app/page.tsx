@@ -5,6 +5,29 @@ import Link from "next/link";
 import { TravelFormData, RouteResult, RouteVariant, TransportOption } from "@/lib/schema";
 import { transportLink, stayLink } from "@/lib/deep-links";
 
+// ─── Reveal-on-scroll хук (премиальное плавное появление при скролле) ──────────
+function useReveal(trigger?: unknown) {
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const els = Array.from(document.querySelectorAll<HTMLElement>(".reveal:not(.is-visible)"));
+    if (els.length === 0) return;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.classList.add("is-visible");
+            io.unobserve(e.target);
+          }
+        }
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [trigger]);
+}
+
 // ─── constants ────────────────────────────────────────────────────────────────
 
 const DISTANCE_OPTIONS = [
@@ -273,7 +296,7 @@ function VariantCard({
             <div key={key} className="flex items-center gap-2">
               <span className="text-xs text-neutral-500 w-24 shrink-0">{labels[key]}</span>
               <div className="flex-1 bg-neutral-200 rounded-full h-1">
-                <div className="bg-neutral-900 h-1 rounded-full" style={{ width: `${pct}%` }} />
+                <div className="bar-fill bg-neutral-900 h-1 rounded-full" style={{ width: `${pct}%` }} />
               </div>
               <span className="text-xs text-neutral-600 w-20 text-right shrink-0">
                 {val.toLocaleString("ru")} ₽
@@ -416,10 +439,12 @@ function DuolingoCards({
               : null;
           const bonus = TIER_BONUS[tier];
 
+          const revealDelay = tier === "budget" ? "reveal-d1" : tier === "balanced" ? "reveal-d2" : "reveal-d3";
+
           return (
             <div
               key={tier}
-              className={`relative bg-white ring-2 rounded-3xl p-6 flex flex-col gap-4 transition-transform ${
+              className={`reveal ${revealDelay} lift relative bg-white ring-2 rounded-3xl p-6 flex flex-col gap-4 ${
                 isBalanced
                   ? "ring-emerald-500/40 md:scale-[1.02]"
                   : "ring-neutral-200"
@@ -609,6 +634,8 @@ export default function Home() {
 
   const activeVariant = result?.variants.find((v) => v.tier === activeTier);
 
+  useReveal(result);
+
   return (
     <div className="min-h-screen bg-white text-neutral-900">
       {/* ── TOAST ── */}
@@ -668,14 +695,14 @@ export default function Home() {
             <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-sky-200/25 rounded-full blur-3xl" />
           </div>
           <div className="max-w-[680px]">
-            <h1 className="text-5xl md:text-6xl font-[550] tracking-tight leading-[1.05] text-neutral-900">
+            <h1 className="hero-in text-5xl md:text-6xl font-[550] tracking-tight leading-[1.05] text-neutral-900">
               Маршрут по России.<br />
               <span className="text-neutral-400">3 варианта за 30 секунд.</span>
             </h1>
-            <p className="text-base text-neutral-600 max-w-[48ch] mt-6">
+            <p className="hero-in hero-in-d1 text-base text-neutral-600 max-w-[48ch] mt-6">
               Задайте бюджет, стиль и количество дней — ИИ соберёт бюджетный, сбалансированный и комфортный вариант с конкретными отелями, билетами и планом по дням.
             </p>
-            <div className="flex gap-3 flex-wrap mt-6">
+            <div className="hero-in hero-in-d2 flex gap-3 flex-wrap mt-6">
               <a
                 href="#form"
                 className="inline-flex items-center px-5 py-2 rounded-full bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-700 transition"
@@ -690,7 +717,7 @@ export default function Home() {
               </a>
             </div>
           </div>
-          <div className="mt-12 lg:mt-16 -mx-6 sm:mx-0">
+          <div className="hero-in hero-in-d3 mt-12 lg:mt-16 -mx-6 sm:mx-0">
             <img
               src="/hero.png"
               alt="Путешествие на поезде через Россию — вид из окна на старинный город"
@@ -735,7 +762,7 @@ export default function Home() {
                 key={dest.name}
                 type="button"
                 onClick={() => handleDestinationClick(dest)}
-                className="group relative aspect-[4/3] overflow-hidden rounded-2xl ring-1 ring-neutral-950/10 hover:ring-neutral-950/20 transition-all hover:shadow-xl text-left"
+                className="reveal lift group relative aspect-[4/3] overflow-hidden rounded-2xl ring-1 ring-neutral-950/10 hover:ring-neutral-950/20 text-left"
               >
                 <img
                   src={dest.image}
@@ -758,7 +785,7 @@ export default function Home() {
       <div className="canvas-grid-line" />
       <section className="border-x border-neutral-200 max-w-[1280px] mx-auto">
         <div className="px-6 py-16">
-          <h2 className="text-3xl md:text-4xl tracking-tight font-[550]">Почему нам можно доверять</h2>
+          <h2 className="reveal text-3xl md:text-4xl tracking-tight font-[550]">Почему нам можно доверять</h2>
           <p className="text-neutral-600 mt-2 mb-10">6 фактов, которые делают AI-Trip честным помощником, а не очередным чатом</p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[

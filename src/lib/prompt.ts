@@ -128,5 +128,8 @@ export function buildUserPrompt(form: TravelFormData): string {
 ${dateBlock}
 ${form.constraints ? `- Ограничения и пожелания: ${form.constraints}` : "- Особых ограничений нет"}
 
-Помни: нужно РОВНО 3 варианта (budget / balanced / comfort). Верни ТОЛЬКО JSON.`;
+Помни:
+- РОВНО 3 варианта (budget / balanced / comfort)
+- ЦЕНЫ ОБЯЗАТЕЛЬНО РАЗНЫЕ: budget ≈ ${Math.round(form.budget * 0.65).toLocaleString("ru")} ₽, balanced ≈ ${Math.round(form.budget * 0.95).toLocaleString("ru")} ₽, comfort ≈ ${Math.round(form.budget * 1.2).toLocaleString("ru")} ₽. НЕ делай их одинаковыми!
+- Верни ТОЛЬКО JSON.`;
 }
