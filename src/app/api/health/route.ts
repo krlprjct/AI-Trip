@@ -21,6 +21,25 @@ export async function GET(req: Request) {
     deployedAt: "2026-06-01",
   };
 
+  if (test === "models") {
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    if (!apiKey) return NextResponse.json({ ...base, models: "NO KEY" });
+    try {
+      const res = await fetch("https://openrouter.ai/api/v1/models", {
+        headers: { Authorization: `Bearer ${apiKey}` },
+        signal: AbortSignal.timeout(25000),
+      });
+      const data = await res.json();
+      const freeModels = (data.data ?? [])
+        .filter((m: { id: string }) => m.id.endsWith(":free"))
+        .map((m: { id: string }) => m.id)
+        .sort();
+      return NextResponse.json({ ...base, freeModelCount: freeModels.length, freeModels });
+    } catch (err) {
+      return NextResponse.json({ ...base, models: err instanceof Error ? err.message : "err" });
+    }
+  }
+
   if (test === "openrouter") {
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) return NextResponse.json({ ...base, openrouter: "NO KEY" });
