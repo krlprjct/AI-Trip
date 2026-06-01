@@ -78,6 +78,40 @@ async function callGemini(prompt: string, useFlash = false): Promise<string> {
   return "";
 }
 
+async function callOpenRouter(systemPrompt: string, userPrompt: string): Promise<string> {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) return "";
+  try {
+    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model: "deepseek/deepseek-v4-flash:free",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        temperature: 0.7,
+        max_tokens: 8192,
+        response_format: { type: "json_object" },
+      }),
+      signal: AbortSignal.timeout(20000),
+    });
+    if (!res.ok) {
+      console.error(`[refine OpenRouter] ${res.status}:`, (await res.text()).slice(0, 200));
+      return "";
+    }
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content ?? "";
+  } catch (err) {
+    if (err instanceof Error && (err.name === "TimeoutError" || err.name === "AbortError")) {
+      console.error("[refine OpenRouter] timeout");
+      return "";
+    }
+    throw err;
+  }
+}
+
 async function callDeepSeek(systemPrompt: string, userPrompt: string): Promise<string> {
   const apiKey = process.env.DEEPSEEK_API_KEY;
   if (!apiKey) return "";
@@ -144,10 +178,11 @@ export async function POST(req: NextRequest) {
 
     const { variant, instruction, form } = parsed.data;
 
+    const hasOpenRouter = !!process.env.OPENROUTER_API_KEY;
     const hasDeepSeek = !!process.env.DEEPSEEK_API_KEY;
     const hasGemini = getGeminiKeys().length > 0;
 
-    if (!hasDeepSeek && !hasGemini) {
+    if (!hasOpenRouter && !hasDeepSeek && !hasGemini) {
       // Mock: return same variant
       return NextResponse.json(variant);
     }
@@ -169,9 +204,10 @@ ${JSON.stringify(variant, null, 2)}
 
 Перегенерируй вариант с учётом просьбы, сохрани JSON-структуру (та же что у RouteVariantSchema). Верни ТОЛЬКО JSON одного варианта (без обёртки массива, без поля variants).`;
 
-    // Каскад: DeepSeek → Gemini Lite → Gemini Flash
+    // Каскад: OpenRouter → DeepSeek → Gemini Lite → Gemini Flash
     let result = null;
     const attempts: Array<() => Promise<string>> = [];
+    if (hasOpenRouter) attempts.push(() => callOpenRouter(SYSTEM_PROMPT, buildPrompt()));
     if (hasDeepSeek) attempts.push(() => callDeepSeek(SYSTEM_PROMPT, buildPrompt()));
     if (hasGemini) {
       attempts.push(() => callGemini(buildPrompt()));

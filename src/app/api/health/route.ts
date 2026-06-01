@@ -14,7 +14,8 @@ export async function GET(req: Request) {
     : 0;
 
   const base = {
-    version: "gemini-key-rotation-v3",
+    version: "openrouter-cascade-v4",
+    hasOpenRouterKey: !!process.env.OPENROUTER_API_KEY,
     geminiKeyCount,
     hasDeepSeekKey: !!process.env.DEEPSEEK_API_KEY,
     deployedAt: "2026-06-01",

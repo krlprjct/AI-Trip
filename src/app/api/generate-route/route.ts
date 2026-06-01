@@ -168,6 +168,49 @@ async function callDeepSeek(prompt: string): Promise<string> {
   }
 }
 
+// ─── OpenRouter (основной: 200 RPD free, без карты, доступ из РФ, OpenAI-совместим) ─
+
+async function callOpenRouter(prompt: string): Promise<string> {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) return "";
+
+  try {
+    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "deepseek/deepseek-v4-flash:free",
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: prompt },
+        ],
+        temperature: 0.7,
+        max_tokens: 8192,
+        response_format: { type: "json_object" },
+      }),
+      signal: AbortSignal.timeout(20000),
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error(`[OpenRouter] ${res.status}:`, errText.slice(0, 200));
+      return "";
+    }
+
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content ?? "";
+  } catch (err) {
+    if (err instanceof Error && (err.name === "TimeoutError" || err.name === "AbortError")) {
+      console.error("[OpenRouter] timeout");
+      return "";
+    }
+    throw err;
+  }
+}
+
 // ─── tryParseAndValidate ──────────────────────────────────────────────────────
 
 function tryParseAndValidate(rawText: string) {
@@ -201,11 +244,12 @@ export async function POST(req: NextRequest) {
     const form = formParsed.data;
 
     // 2. Mock mode — если нет ни одного ключа
+    const hasOpenRouter = !!process.env.OPENROUTER_API_KEY;
     const hasDeepSeek = !!process.env.DEEPSEEK_API_KEY;
     const hasGemini = getGeminiKeys().length > 0;
     const hasOpenAI = !!process.env.OPENAI_API_KEY;
 
-    if (!hasDeepSeek && !hasGemini && !hasOpenAI) {
+    if (!hasOpenRouter && !hasDeepSeek && !hasGemini && !hasOpenAI) {
       await new Promise((r) => setTimeout(r, 1500));
       return NextResponse.json(MOCK_ROUTE);
     }
@@ -217,16 +261,17 @@ export async function POST(req: NextRequest) {
 
     let validated = null;
 
-    // Каскад: DeepSeek (без дневного лимита) → Gemini Lite → Gemini Flash → OpenAI
+    // Каскад: OpenRouter (200 RPD) → DeepSeek → Gemini Lite → Gemini Flash → OpenAI
     // Каждый следующий вызывается только если предыдущий не дал валидный JSON
     const attempts: Array<() => Promise<string>> = [];
+    if (hasOpenRouter) attempts.push(() => callOpenRouter(userPrompt));
     if (hasDeepSeek) attempts.push(() => callDeepSeek(userPrompt));
     if (hasGemini) {
       attempts.push(() => callGemini(userPrompt));            // Lite
       attempts.push(() => callGemini(RETRY_PREFIX + userPrompt, true)); // Flash
     }
     if (hasOpenAI) attempts.push(() => callOpenAI(userPrompt));
-    // Worst-case латентность каскада: DeepSeek 20s + Lite 15s + Flash 15s = 50s < maxDuration 60s
+    // Worst-case латентность: при одном активном провайдере ~20-40s < maxDuration 60s
 
     for (const attempt of attempts) {
       const raw = await attempt();
