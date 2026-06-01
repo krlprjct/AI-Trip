@@ -21,6 +21,33 @@ export async function GET(req: Request) {
     deployedAt: "2026-06-01",
   };
 
+  if (test === "openrouter") {
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    if (!apiKey) return NextResponse.json({ ...base, openrouter: "NO KEY" });
+    try {
+      const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+        body: JSON.stringify({
+          model: "deepseek/deepseek-v4-flash:free",
+          messages: [{ role: "user", content: 'Верни JSON: {"ok": true}' }],
+          max_tokens: 50,
+          response_format: { type: "json_object" },
+        }),
+        signal: AbortSignal.timeout(25000),
+      });
+      return NextResponse.json({
+        ...base,
+        openrouter: { status: res.status, body: (await res.text()).slice(0, 600) },
+      });
+    } catch (err) {
+      return NextResponse.json({
+        ...base,
+        openrouter: { error: err instanceof Error ? `${err.name}: ${err.message}` : "unknown" },
+      });
+    }
+  }
+
   if (test === "deepseek") {
     const apiKey = process.env.DEEPSEEK_API_KEY;
     if (!apiKey) return NextResponse.json({ ...base, deepseek: "NO KEY" });
