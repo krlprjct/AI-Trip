@@ -750,7 +750,7 @@ export default function Home() {
       <div className="canvas-grid-line" />
       <section className="border-x border-neutral-200 max-w-[1280px] mx-auto">
         <div className="px-6 py-14">
-          <h2 className="text-2xl md:text-3xl font-[550] tracking-tight mb-2">
+          <h2 className="reveal text-2xl md:text-3xl font-[550] tracking-tight mb-2">
             Куда поехать?
           </h2>
           <p className="text-sm text-neutral-500 mb-8">
@@ -1188,7 +1188,7 @@ export default function Home() {
       <div className="canvas-grid-line" />
       <section id="how" className="border-x border-neutral-200 max-w-[1280px] mx-auto">
         <div className="px-6 py-16">
-          <h2 className="text-3xl md:text-4xl font-[550] tracking-tight mb-12">
+          <h2 className="reveal text-3xl md:text-4xl font-[550] tracking-tight mb-12">
             <span className="text-neutral-900">Как это работает.</span>{" "}
             <span className="text-neutral-400">Три шага до готового маршрута.</span>
           </h2>
@@ -1202,7 +1202,7 @@ export default function Home() {
               {
                 step: "02",
                 title: "ИИ собирает 3 варианта",
-                desc: "За 15–30 секунд Gemini анализирует параметры и формирует три маршрута: бюджетный, сбалансированный и комфортный — с конкретными отелями и ценами.",
+                desc: "За 15–30 секунд ИИ анализирует параметры и формирует три маршрута: бюджетный, сбалансированный и комфортный — с конкретными отелями и ценами.",
               },
               {
                 step: "03",
@@ -1210,7 +1210,7 @@ export default function Home() {
                 desc: "Выбираете подходящий вариант. Ссылки на Островок, Tutu.ru и Aviasales для бронирования. Скоро — прямые кнопки бронирования.",
               },
             ].map((item) => (
-              <div key={item.step} className="bg-neutral-950/[0.025] ring-1 ring-neutral-950/5 rounded-2xl p-6">
+              <div key={item.step} className="reveal lift bg-neutral-950/[0.025] ring-1 ring-neutral-950/5 rounded-2xl p-6">
                 <p className="text-4xl font-[550] text-neutral-200 mb-4 tracking-tight">{item.step}</p>
                 <p className="font-medium text-neutral-900 mb-2">{item.title}</p>
                 <p className="text-sm text-neutral-600">{item.desc}</p>
@@ -1238,7 +1238,7 @@ export default function Home() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
             {/* Сам себе пилот */}
-            <div className="relative rounded-2xl p-6 flex flex-col h-full gap-4 bg-emerald-50 ring-1 ring-emerald-600/20">
+            <div className="reveal lift relative rounded-2xl p-6 flex flex-col h-full gap-4 bg-emerald-50 ring-1 ring-emerald-600/20">
               <span className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-100 text-emerald-700 ring-1 ring-emerald-600/30">✅ Сейчас работает</span>
               <div>
                 <div className="text-3xl mb-3">🎒</div>
@@ -1259,7 +1259,7 @@ export default function Home() {
             </div>
 
             {/* Автопилот Лайт */}
-            <div className="relative rounded-2xl p-6 flex flex-col h-full gap-4 bg-sky-50 ring-1 ring-sky-600/20">
+            <div className="reveal lift relative rounded-2xl p-6 flex flex-col h-full gap-4 bg-sky-50 ring-1 ring-sky-600/20">
               <span className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-100 text-amber-700 ring-1 ring-amber-600/30">🚧 Скоро</span>
               <div>
                 <div className="text-3xl mb-3">✈️</div>
@@ -1280,7 +1280,7 @@ export default function Home() {
             </div>
 
             {/* Автопилот Полный — featured */}
-            <div className="relative rounded-2xl p-6 flex flex-col h-full gap-4 bg-neutral-900 text-white ring-1 ring-neutral-900">
+            <div className="reveal lift relative rounded-2xl p-6 flex flex-col h-full gap-4 bg-neutral-900 text-white ring-1 ring-neutral-900">
               <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-amber-400 text-amber-950 text-xs font-bold whitespace-nowrap">Популярный</span>
               <span className="absolute top-3 right-3 px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-100 text-amber-700 ring-1 ring-amber-600/30">🚧 Скоро</span>
               <div>
@@ -1305,7 +1305,7 @@ export default function Home() {
             </div>
 
             {/* Автопилот Премиум */}
-            <div className="relative rounded-2xl p-6 flex flex-col h-full gap-4 bg-purple-50 ring-1 ring-purple-600/20">
+            <div className="reveal lift relative rounded-2xl p-6 flex flex-col h-full gap-4 bg-purple-50 ring-1 ring-purple-600/20">
               <div>
                 <div className="text-3xl mb-3">👑</div>
                 <h3 className="text-lg font-semibold text-neutral-900">Автопилот премиум</h3>

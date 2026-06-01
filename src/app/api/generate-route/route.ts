@@ -260,11 +260,11 @@ export async function POST(req: NextRequest) {
 
     let validated = null;
 
-    // Каскад: OpenRouter (200 RPD) → DeepSeek → Gemini Lite → Gemini Flash → OpenAI
-    // Каждый следующий вызывается только если предыдущий не дал валидный JSON
+    // Каскад: DeepSeek (json_object, стабильный) → OpenRouter llama (free) → Gemini
+    // DeepSeek первым — у него гарантированный JSON-режим, надёжнее free llama.
     const attempts: Array<() => Promise<string>> = [];
-    if (hasOpenRouter) attempts.push(() => callOpenRouter(userPrompt));
     if (hasDeepSeek) attempts.push(() => callDeepSeek(userPrompt));
+    if (hasOpenRouter) attempts.push(() => callOpenRouter(userPrompt));
     if (hasGemini) {
       attempts.push(() => callGemini(userPrompt));            // Lite
       attempts.push(() => callGemini(RETRY_PREFIX + userPrompt, true)); // Flash

@@ -206,8 +206,8 @@ ${JSON.stringify(variant, null, 2)}
     // Каскад: OpenRouter → DeepSeek → Gemini Lite → Gemini Flash
     let result = null;
     const attempts: Array<() => Promise<string>> = [];
-    if (hasOpenRouter) attempts.push(() => callOpenRouter(SYSTEM_PROMPT, buildPrompt()));
     if (hasDeepSeek) attempts.push(() => callDeepSeek(SYSTEM_PROMPT, buildPrompt()));
+    if (hasOpenRouter) attempts.push(() => callOpenRouter(SYSTEM_PROMPT, buildPrompt()));
     if (hasGemini) {
       attempts.push(() => callGemini(buildPrompt()));
       attempts.push(() => callGemini(buildPrompt(RETRY_PREFIX), true));
