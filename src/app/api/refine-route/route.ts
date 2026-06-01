@@ -60,6 +60,45 @@ async function callGemini(prompt: string, useFlash = false): Promise<string> {
   }
 }
 
+async function callDeepSeek(systemPrompt: string, userPrompt: string): Promise<string> {
+  const apiKey = process.env.DEEPSEEK_API_KEY;
+  if (!apiKey) return "";
+
+  try {
+    const res = await fetch("https://api.deepseek.com/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "deepseek-chat",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        temperature: 0.7,
+        max_tokens: 8192,
+        response_format: { type: "json_object" },
+      }),
+      signal: AbortSignal.timeout(40000),
+    });
+
+    if (!res.ok) {
+      console.error(`[refine DeepSeek] ${res.status}:`, (await res.text()).slice(0, 200));
+      return "";
+    }
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content ?? "";
+  } catch (err) {
+    if (err instanceof Error && (err.name === "TimeoutError" || err.name === "AbortError")) {
+      console.error("[refine DeepSeek] timeout");
+      return "";
+    }
+    throw err;
+  }
+}
+
 function tryParseAndValidate(rawText: string) {
   const jsonString = extractJSON(rawText);
   let parsed: unknown;
@@ -87,7 +126,10 @@ export async function POST(req: NextRequest) {
 
     const { variant, instruction, form } = parsed.data;
 
-    if (!process.env.GEMINI_API_KEY) {
+    const hasDeepSeek = !!process.env.DEEPSEEK_API_KEY;
+    const hasGemini = !!process.env.GEMINI_API_KEY;
+
+    if (!hasDeepSeek && !hasGemini) {
       // Mock: return same variant
       return NextResponse.json(variant);
     }
@@ -109,15 +151,22 @@ ${JSON.stringify(variant, null, 2)}
 
 Перегенерируй вариант с учётом просьбы, сохрани JSON-структуру (та же что у RouteVariantSchema). Верни ТОЛЬКО JSON одного варианта (без обёртки массива, без поля variants).`;
 
-    // First attempt
-    let raw = await callGemini(buildPrompt());
-    let result = raw ? tryParseAndValidate(raw) : null;
+    // Каскад: DeepSeek → Gemini Lite → Gemini Flash
+    let result = null;
+    const attempts: Array<() => Promise<string>> = [];
+    if (hasDeepSeek) attempts.push(() => callDeepSeek(SYSTEM_PROMPT, buildPrompt()));
+    if (hasGemini) {
+      attempts.push(() => callGemini(buildPrompt()));
+      attempts.push(() => callGemini(buildPrompt(RETRY_PREFIX), true));
+    }
+    if (hasDeepSeek) attempts.push(() => callDeepSeek(SYSTEM_PROMPT, buildPrompt(RETRY_PREFIX)));
 
-    // Retry — upgrade to gemini-2.5-flash
-    if (!result) {
-      console.warn("[refine-route] Lite failed, retrying with gemini-2.5-flash...");
-      raw = await callGemini(buildPrompt(RETRY_PREFIX), true);
-      result = raw ? tryParseAndValidate(raw) : null;
+    for (const attempt of attempts) {
+      const raw = await attempt();
+      if (raw) {
+        result = tryParseAndValidate(raw);
+        if (result) break;
+      }
     }
 
     if (!result) {

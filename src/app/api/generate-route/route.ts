@@ -97,6 +97,49 @@ async function callOpenAI(prompt: string): Promise<string> {
   return data.choices?.[0]?.message?.content ?? "";
 }
 
+// ─── DeepSeek (основная модель, без дневного лимита, доступна из РФ) ────────────
+
+async function callDeepSeek(prompt: string): Promise<string> {
+  const apiKey = process.env.DEEPSEEK_API_KEY;
+  if (!apiKey) return "";
+
+  try {
+    const res = await fetch("https://api.deepseek.com/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "deepseek-chat",
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: prompt },
+        ],
+        temperature: 0.7,
+        max_tokens: 8192,
+        response_format: { type: "json_object" },
+      }),
+      signal: AbortSignal.timeout(40000),
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error(`[DeepSeek] ${res.status}:`, errText.slice(0, 200));
+      return "";
+    }
+
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content ?? "";
+  } catch (err) {
+    if (err instanceof Error && (err.name === "TimeoutError" || err.name === "AbortError")) {
+      console.error("[DeepSeek] timeout");
+      return "";
+    }
+    throw err;
+  }
+}
+
 // ─── tryParseAndValidate ──────────────────────────────────────────────────────
 
 function tryParseAndValidate(rawText: string) {
@@ -129,46 +172,40 @@ export async function POST(req: NextRequest) {
 
     const form = formParsed.data;
 
-    // 2. Mock mode — если нет ключей
+    // 2. Mock mode — если нет ни одного ключа
+    const hasDeepSeek = !!process.env.DEEPSEEK_API_KEY;
     const hasGemini = !!process.env.GEMINI_API_KEY;
     const hasOpenAI = !!process.env.OPENAI_API_KEY;
 
-    if (!hasGemini && !hasOpenAI) {
+    if (!hasDeepSeek && !hasGemini && !hasOpenAI) {
       await new Promise((r) => setTimeout(r, 1500));
       return NextResponse.json(MOCK_ROUTE);
     }
 
-    // 3. Build prompt & call LLM (with retry)
+    // 3. Build prompt & call LLM с каскадом провайдеров
     const userPrompt = buildUserPrompt(form);
     const RETRY_PREFIX =
       "КРИТИЧНО: предыдущий ответ был невалидным. Верни ТОЛЬКО валидный JSON, начинающийся с { и заканчивающийся }. Никакого markdown, никаких пояснений.\n\n";
 
-    let rawText: string;
     let validated = null;
 
-    // First attempt
+    // Каскад: DeepSeek (без дневного лимита) → Gemini Lite → Gemini Flash → OpenAI
+    // Каждый следующий вызывается только если предыдущий не дал валидный JSON
+    const attempts: Array<() => Promise<string>> = [];
+    if (hasDeepSeek) attempts.push(() => callDeepSeek(userPrompt));
     if (hasGemini) {
-      rawText = await callGemini(userPrompt);
-    } else {
-      rawText = await callOpenAI(userPrompt);
+      attempts.push(() => callGemini(userPrompt));            // Lite
+      attempts.push(() => callGemini(RETRY_PREFIX + userPrompt, true)); // Flash
     }
+    if (hasOpenAI) attempts.push(() => callOpenAI(userPrompt));
+    // DeepSeek retry со строгим префиксом в самом конце, если он есть
+    if (hasDeepSeek) attempts.push(() => callDeepSeek(RETRY_PREFIX + userPrompt));
 
-    if (rawText) {
-      validated = tryParseAndValidate(rawText);
-    }
-
-    // Retry if first attempt failed — upgrade to gemini-2.5-flash (мощнее Lite)
-    if (!validated) {
-      console.warn("[generate-route] Lite failed, retrying with gemini-2.5-flash...");
-      const retryPrompt = RETRY_PREFIX + userPrompt;
-      let retryRaw: string;
-      if (hasGemini) {
-        retryRaw = await callGemini(retryPrompt, true); // useFlash=true
-      } else {
-        retryRaw = await callOpenAI(retryPrompt);
-      }
-      if (retryRaw) {
-        validated = tryParseAndValidate(retryRaw);
+    for (const attempt of attempts) {
+      const raw = await attempt();
+      if (raw) {
+        validated = tryParseAndValidate(raw);
+        if (validated) break;
       }
     }
 
