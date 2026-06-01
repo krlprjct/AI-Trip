@@ -86,16 +86,15 @@ async function callOpenRouter(systemPrompt: string, userPrompt: string): Promise
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
-        model: "deepseek/deepseek-v4-flash:free",
+        model: "meta-llama/llama-3.3-70b-instruct:free",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
         temperature: 0.7,
         max_tokens: 8192,
-        response_format: { type: "json_object" },
       }),
-      signal: AbortSignal.timeout(20000),
+      signal: AbortSignal.timeout(30000),
     });
     if (!res.ok) {
       console.error(`[refine OpenRouter] ${res.status}:`, (await res.text()).slice(0, 200));
