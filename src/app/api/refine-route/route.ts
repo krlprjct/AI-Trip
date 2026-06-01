@@ -92,9 +92,9 @@ async function callOpenRouter(systemPrompt: string, userPrompt: string): Promise
           { role: "user", content: userPrompt },
         ],
         temperature: 0.7,
-        max_tokens: 8192,
+        max_tokens: 20000,
       }),
-      signal: AbortSignal.timeout(30000),
+      signal: AbortSignal.timeout(50000),
     });
     if (!res.ok) {
       console.error(`[refine OpenRouter] ${res.status}:`, (await res.text()).slice(0, 200));
@@ -129,7 +129,7 @@ async function callDeepSeek(systemPrompt: string, userPrompt: string): Promise<s
           { role: "user", content: userPrompt },
         ],
         temperature: 0.7,
-        max_tokens: 8192,
+        max_tokens: 20000,
         response_format: { type: "json_object" },
       }),
       signal: AbortSignal.timeout(20000),

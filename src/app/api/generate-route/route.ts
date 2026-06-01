@@ -145,7 +145,7 @@ async function callDeepSeek(prompt: string): Promise<string> {
           { role: "user", content: prompt },
         ],
         temperature: 0.7,
-        max_tokens: 8192,
+        max_tokens: 20000,
         response_format: { type: "json_object" },
       }),
       signal: AbortSignal.timeout(20000),
@@ -188,9 +188,9 @@ async function callOpenRouter(prompt: string): Promise<string> {
           { role: "user", content: prompt },
         ],
         temperature: 0.7,
-        max_tokens: 8192,
+        max_tokens: 20000,
       }),
-      signal: AbortSignal.timeout(30000),
+      signal: AbortSignal.timeout(50000),
     });
 
     if (!res.ok) {
