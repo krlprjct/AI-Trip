@@ -3,6 +3,8 @@ import { TravelFormSchema, RouteVariantSchema } from "@/lib/schema";
 import { SYSTEM_PROMPT } from "@/lib/prompt";
 import { z } from "zod";
 
+export const maxDuration = 60;
+
 const RefineRequestSchema = z.object({
   variant: RouteVariantSchema,
   instruction: z.string().min(1),
@@ -39,7 +41,7 @@ async function callGemini(prompt: string, useFlash = false): Promise<string> {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
-      signal: AbortSignal.timeout(25000),
+      signal: AbortSignal.timeout(15000),
     });
 
     if (!res.ok) {
@@ -81,7 +83,7 @@ async function callDeepSeek(systemPrompt: string, userPrompt: string): Promise<s
         max_tokens: 8192,
         response_format: { type: "json_object" },
       }),
-      signal: AbortSignal.timeout(40000),
+      signal: AbortSignal.timeout(20000),
     });
 
     if (!res.ok) {
@@ -159,7 +161,7 @@ ${JSON.stringify(variant, null, 2)}
       attempts.push(() => callGemini(buildPrompt()));
       attempts.push(() => callGemini(buildPrompt(RETRY_PREFIX), true));
     }
-    if (hasDeepSeek) attempts.push(() => callDeepSeek(SYSTEM_PROMPT, buildPrompt(RETRY_PREFIX)));
+    // Worst-case: DeepSeek 20s + Lite 15s + Flash 15s = 50s < maxDuration 60s
 
     for (const attempt of attempts) {
       const raw = await attempt();

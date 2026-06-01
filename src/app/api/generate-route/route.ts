@@ -3,6 +3,10 @@ import { TravelFormSchema, RouteResultSchema } from "@/lib/schema";
 import { SYSTEM_PROMPT, buildUserPrompt } from "@/lib/prompt";
 import { MOCK_ROUTE } from "@/lib/mock";
 
+// Vercel: без этого serverless-функция режется на 10s по умолчанию.
+// Каскад провайдеров требует больше времени.
+export const maxDuration = 60;
+
 // ─── helpers ────────────────────────────────────────────────────────────────
 
 function extractJSON(text: string): string {
@@ -41,7 +45,7 @@ async function callGemini(prompt: string, useFlash = false): Promise<string> {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
-      signal: AbortSignal.timeout(25000),
+      signal: AbortSignal.timeout(15000),
     });
 
     if (!res.ok) {
@@ -68,6 +72,7 @@ async function callGemini(prompt: string, useFlash = false): Promise<string> {
 // ─── OpenAI ──────────────────────────────────────────────────────────────────
 
 async function callOpenAI(prompt: string): Promise<string> {
+  if (!process.env.OPENAI_API_KEY) return "";
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -84,7 +89,7 @@ async function callOpenAI(prompt: string): Promise<string> {
       max_tokens: 4096,
       response_format: { type: "json_object" },
     }),
-    signal: AbortSignal.timeout(25000),
+    signal: AbortSignal.timeout(15000),
   });
 
   if (!res.ok) {
@@ -120,7 +125,7 @@ async function callDeepSeek(prompt: string): Promise<string> {
         max_tokens: 8192,
         response_format: { type: "json_object" },
       }),
-      signal: AbortSignal.timeout(40000),
+      signal: AbortSignal.timeout(20000),
     });
 
     if (!res.ok) {
@@ -198,8 +203,7 @@ export async function POST(req: NextRequest) {
       attempts.push(() => callGemini(RETRY_PREFIX + userPrompt, true)); // Flash
     }
     if (hasOpenAI) attempts.push(() => callOpenAI(userPrompt));
-    // DeepSeek retry со строгим префиксом в самом конце, если он есть
-    if (hasDeepSeek) attempts.push(() => callDeepSeek(RETRY_PREFIX + userPrompt));
+    // Worst-case латентность каскада: DeepSeek 20s + Lite 15s + Flash 15s = 50s < maxDuration 60s
 
     for (const attempt of attempts) {
       const raw = await attempt();
