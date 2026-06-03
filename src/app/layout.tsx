@@ -9,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "AI-Trip — Маршруты по России от ИИ",
+  title: "Авто-Пилот — Маршруты по России от ИИ",
   description: "Персональный маршрут путешествия от искусственного интеллекта за 30 секунд",
 };
 

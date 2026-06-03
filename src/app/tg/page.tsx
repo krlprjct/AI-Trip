@@ -7,7 +7,7 @@ export default function TgPage() {
       <header className="border-b border-neutral-200">
         <div className="max-w-[1280px] mx-auto px-6 py-5 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 text-lg font-semibold tracking-tight">
-            🗺️ AI-Trip
+            🗺️ Авто-Пилот
           </Link>
           <Link href="/" className="text-sm text-neutral-600 hover:text-neutral-900">← Главная</Link>
         </div>
@@ -18,7 +18,7 @@ export default function TgPage() {
             Скоро в Telegram
           </span>
           <h1 className="text-5xl tracking-tight font-[550] leading-[1.05] mb-6">
-            AI-Trip <span className="text-neutral-500">в кармане.</span>
+            Авто-Пилот <span className="text-neutral-500">в кармане.</span>
           </h1>
           <p className="text-lg text-neutral-600 max-w-[40ch] mb-8">
             Запросите маршрут одним сообщением. Получите 3 варианта прямо в чате.
@@ -51,7 +51,7 @@ export default function TgPage() {
         </div>
       </section>
       <footer className="border-t border-neutral-200 py-8 text-center text-sm text-neutral-500">
-        © 2026 AI-Trip · Российский ИИ-планировщик путешествий
+        © 2026 Авто-Пилот · Российский ИИ-планировщик путешествий
       </footer>
     </main>
   );

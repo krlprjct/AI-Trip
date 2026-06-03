@@ -654,7 +654,7 @@ export default function Home() {
               onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }}
               className="flex items-center gap-2 font-[550] text-neutral-900"
             >
-              <span>🗺️</span> AI-Trip
+              <span>🗺️</span> Авто-Пилот
             </a>
             <div className="hidden md:flex items-center gap-6">
               <a
@@ -786,7 +786,7 @@ export default function Home() {
       <section className="border-x border-neutral-200 max-w-[1280px] mx-auto">
         <div className="px-6 py-16">
           <h2 className="reveal text-3xl md:text-4xl tracking-tight font-[550]">Почему нам можно доверять</h2>
-          <p className="text-neutral-600 mt-2 mb-10">6 фактов, которые делают AI-Trip честным помощником, а не очередным чатом</p>
+          <p className="text-neutral-600 mt-2 mb-10">6 фактов, которые делают Авто-Пилот честным помощником, а не очередным чатом</p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
               {
@@ -1313,7 +1313,7 @@ export default function Home() {
                 <p className="text-xs mt-1 text-neutral-500">VIP и групповые поездки</p>
               </div>
               <ul className="space-y-1.5 flex-1">
-                {["Персональный менеджер", "Ручная проверка отелей", "Раннее заселение", "Гибкие изменения маршрута"].map((f) => (
+                {["Персональный менеджер", "Ручная проверка отелей", "Гибкие изменения маршрута"].map((f) => (
                   <li key={f} className="flex gap-2 text-sm text-neutral-600">
                     <span className="text-purple-600">✓</span>{f}
                   </li>
@@ -1398,7 +1398,7 @@ export default function Home() {
         <div className="px-6 py-12 grid md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center gap-2 font-[550] text-neutral-900 mb-3">
-              <span>🗺️</span> AI-Trip
+              <span>🗺️</span> Авто-Пилот
             </div>
             <p className="text-sm text-neutral-500">
               Персональные маршруты по России от искусственного интеллекта.
@@ -1435,7 +1435,7 @@ export default function Home() {
           ))}
         </div>
         <div className="border-t border-neutral-200 px-6 py-4">
-          <p className="text-xs text-neutral-400">© 2026 AI-Trip · Дипломный проект УТМН</p>
+          <p className="text-xs text-neutral-400">© 2026 Авто-Пилот · Дипломный проект УТМН</p>
         </div>
       </footer>
     </div>
