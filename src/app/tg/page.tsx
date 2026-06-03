@@ -6,8 +6,8 @@ export default function TgPage() {
     <main className="min-h-screen bg-white text-neutral-900 flex flex-col">
       <header className="border-b border-neutral-200">
         <div className="max-w-[1280px] mx-auto px-6 py-5 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-lg font-semibold tracking-tight">
-            🗺️ Авто-Пилот
+          <Link href="/" className="flex items-center">
+            <img src="/logo.png" alt="Авто-Пилот" className="h-10 w-auto object-contain" />
           </Link>
           <Link href="/" className="text-sm text-neutral-600 hover:text-neutral-900">← Главная</Link>
         </div>

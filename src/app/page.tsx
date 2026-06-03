@@ -652,9 +652,9 @@ export default function Home() {
             <a
               href="#"
               onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-              className="flex items-center gap-2 font-[550] text-neutral-900"
+              className="flex items-center font-[550] text-neutral-900"
             >
-              <span>🗺️</span> Авто-Пилот
+              <img src="/logo.png" alt="Авто-Пилот" className="h-9 w-auto object-contain" />
             </a>
             <div className="hidden md:flex items-center gap-6">
               <a
@@ -1397,8 +1397,8 @@ export default function Home() {
       <footer className="border-x border-neutral-200 max-w-[1280px] mx-auto">
         <div className="px-6 py-12 grid md:grid-cols-4 gap-8">
           <div>
-            <div className="flex items-center gap-2 font-[550] text-neutral-900 mb-3">
-              <span>🗺️</span> Авто-Пилот
+            <div className="flex items-center mb-3">
+              <img src="/logo.png" alt="Авто-Пилот" className="h-11 w-auto object-contain" />
             </div>
             <p className="text-sm text-neutral-500">
               Персональные маршруты по России от искусственного интеллекта.
