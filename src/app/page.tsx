@@ -379,12 +379,6 @@ function LoaderState() {
 
 // ─── tier emoji + bonus labels ────────────────────────────────────────────────
 
-const TIER_EMOJI: Record<string, string> = {
-  budget: "🥉",
-  balanced: "🥈",
-  comfort: "🥇",
-};
-
 const TIER_DISPLAY_LABELS: Record<string, string> = {
   budget: "Эконом",
   balanced: "Сбалансированный",
@@ -444,39 +438,40 @@ function DuolingoCards({
           return (
             <div
               key={tier}
-              className={`reveal ${revealDelay} lift relative bg-white ring-2 rounded-3xl p-6 flex flex-col gap-4 ${
+              className={`reveal ${revealDelay} lift relative bg-white ring-1 rounded-3xl p-6 flex flex-col gap-4 ${
                 isBalanced
-                  ? "ring-emerald-500/40 md:scale-[1.02]"
-                  : "ring-neutral-200"
+                  ? "ring-neutral-900 md:scale-[1.02]"
+                  : "ring-neutral-950/10"
               }`}
             >
-              {/* Editor's choice badge */}
+              {/* Recommended badge */}
               {isBalanced && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap px-3 py-1 rounded-full bg-amber-400 text-amber-950 text-xs font-bold tracking-wide shadow-md">
-                  ★ ВЫБОР РЕДАКЦИИ
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap px-3 py-1 rounded-full bg-neutral-900 text-white text-xs font-medium tracking-wide">
+                  Рекомендуем
                 </div>
               )}
 
               {/* Tier header */}
-              <div className="flex flex-col items-center text-center gap-1 pt-2">
-                <span className="text-4xl">{TIER_EMOJI[tier]}</span>
-                <p className="font-bold text-lg text-neutral-900 leading-tight">
+              <div className="text-center pt-2">
+                <p className="text-xs font-mono uppercase tracking-widest text-neutral-500 mb-1">
+                  {TIER_LABELS[tier]}
+                </p>
+                <p className="font-[550] text-lg text-neutral-900 leading-tight">
                   {TIER_DISPLAY_LABELS[tier]}
                 </p>
               </div>
 
               {/* Price */}
               <div className="text-center">
-                <p className="text-4xl font-[700] tracking-tight text-neutral-900">
+                <p className="text-4xl font-[650] tracking-tight text-neutral-900">
                   {v.total_cost.toLocaleString("ru")} ₽
                 </p>
                 <p className="text-xs text-neutral-500 mt-0.5">за всю поездку</p>
               </div>
 
-              {/* Achievement chips */}
+              {/* Detail chips */}
               <div className="flex flex-col gap-2">
-                {/* Transport chip */}
-                <div className="flex items-center gap-2 bg-neutral-100 rounded-full px-3 py-1.5 text-xs text-neutral-700">
+                <div className="flex items-center gap-2 bg-neutral-950/[0.04] rounded-xl px-3 py-2 text-xs text-neutral-700">
                   <span>{TRANSPORT_ICONS[v.transport.type] ?? "🚀"}</span>
                   <span className="font-medium">
                     {v.transport.price_per_person.toLocaleString("ru")} ₽
@@ -484,15 +479,13 @@ function DuolingoCards({
                   <span className="text-neutral-500 truncate">транспорт</span>
                 </div>
 
-                {/* Stay chip */}
-                <div className="flex items-center gap-2 bg-neutral-100 rounded-full px-3 py-1.5 text-xs text-neutral-700">
+                <div className="flex items-center gap-2 bg-neutral-950/[0.04] rounded-xl px-3 py-2 text-xs text-neutral-700">
                   <span>🏨</span>
                   <span className="font-medium truncate max-w-[200px]">{v.stay.name}</span>
                 </div>
 
-                {/* Day cost chip */}
                 {avgDayCost !== null && (
-                  <div className="flex items-center gap-2 bg-neutral-100 rounded-full px-3 py-1.5 text-xs text-neutral-700">
+                  <div className="flex items-center gap-2 bg-neutral-950/[0.04] rounded-xl px-3 py-2 text-xs text-neutral-700">
                     <span>📅</span>
                     <span className="font-medium">
                       ~{avgDayCost.toLocaleString("ru")} ₽/день
@@ -500,20 +493,18 @@ function DuolingoCards({
                   </div>
                 )}
 
-                {/* Bonus chip */}
-                <div className="flex items-center gap-2 bg-emerald-50 rounded-full px-3 py-1.5 text-xs text-emerald-700 font-medium">
-                  <span>{bonus.emoji}</span>
+                <div className="flex items-center gap-2 px-1 py-0.5 text-xs text-neutral-500">
                   <span>{bonus.label}</span>
                 </div>
               </div>
 
-              {/* Select button */}
+              {/* Select button — в стиле сайта (монохром) */}
               <button
                 onClick={() => handleSelect(tier)}
-                className={`w-full h-14 rounded-2xl font-bold text-base transition-all ${
+                className={`w-full h-12 rounded-full font-medium text-sm transition-all ${
                   isSelected
-                    ? "bg-emerald-50 text-emerald-700 ring-2 ring-emerald-500 shadow-none"
-                    : "bg-emerald-500 text-white shadow-[0_4px_0_0_rgb(5,122,85)] hover:translate-y-[2px] hover:shadow-[0_2px_0_0_rgb(5,122,85)] active:translate-y-[4px] active:shadow-none"
+                    ? "bg-white text-neutral-900 ring-1 ring-neutral-900"
+                    : "bg-neutral-900 text-white hover:bg-neutral-700"
                 }`}
               >
                 {isSelected ? "Выбрано ✓" : "Выбрать"}
