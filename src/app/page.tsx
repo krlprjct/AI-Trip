@@ -76,7 +76,7 @@ const LOADER_MESSAGES = [
 ];
 
 const defaultForm: TravelFormData = {
-  budget: 30000,
+  budget: 30000, 
   days: 5,
   startCity: "Тюмень",
   distancePreference: "russia",
@@ -1235,7 +1235,6 @@ export default function Home() {
                 <div className="text-3xl mb-3">🎒</div>
                 <h3 className="text-lg font-semibold text-neutral-900">Сам себе пилот</h3>
                 <p className="text-2xl font-[550] tracking-tight text-neutral-900 mt-1">0 ₽</p>
-                <p className="text-xs mt-1 text-neutral-500">Студенты и тестирование</p>
               </div>
               <ul className="space-y-1.5 flex-1">
                 {["Безлимит ИИ-маршрутов", "3 варианта на каждый запрос", "Ссылки на Tutu, Островок, Aviasales", "Экспорт в PDF"].map((f) => (
