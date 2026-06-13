@@ -1256,7 +1256,6 @@ export default function Home() {
                 <div className="text-3xl mb-3">✈️</div>
                 <h3 className="text-lg font-semibold text-neutral-900">Автопилот лайт</h3>
                 <p className="text-2xl font-[550] tracking-tight text-neutral-900 mt-1">299 ₽ / поездка</p>
-                <p className="text-xs mt-1 text-neutral-500">Экономные путешественники</p>
               </div>
               <ul className="space-y-1.5 flex-1">
                 {["Всё из бесплатного", "Бронирование в один клик", "История маршрутов", "Email-поддержка"].map((f) => (
@@ -1278,7 +1277,6 @@ export default function Home() {
                 <div className="text-3xl mb-3">🚀</div>
                 <h3 className="text-lg font-semibold text-white">Автопилот полный</h3>
                 <p className="text-2xl font-[550] tracking-tight text-white mt-1">5% с брони</p>
-                <p className="text-xs mt-1 text-neutral-400">Семейные и занятые</p>
               </div>
               <ul className="space-y-1.5 flex-1">
                 {["Прямое бронирование без сервисного сбора", "Поддержка 24/7 в поездке", "Кешбэк баллами на отели", "Сопровождение в поездке"].map((f) => (
@@ -1301,7 +1299,6 @@ export default function Home() {
                 <div className="text-3xl mb-3">👑</div>
                 <h3 className="text-lg font-semibold text-neutral-900">Автопилот премиум</h3>
                 <p className="text-2xl font-[550] tracking-tight text-neutral-900 mt-1">999 ₽ + 3%</p>
-                <p className="text-xs mt-1 text-neutral-500">VIP и групповые поездки</p>
               </div>
               <ul className="space-y-1.5 flex-1">
                 {["Персональный менеджер", "Ручная проверка отелей", "Гибкие изменения маршрута"].map((f) => (
